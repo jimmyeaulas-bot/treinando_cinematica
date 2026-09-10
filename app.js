@@ -1,0 +1,1322 @@
+// =========================================================================
+// CADERNO DE CINEMÁTICA – PROF. ANDRÉ (ARQUITETURA REVISADA & INTEGRADA)
+// =========================================================================
+
+// Ícone vetorial SVG exclusivo para a Medalha de Madeira (nunca quebra em nenhum SO)
+const SVG_MEDALHA_MADEIRA = `
+  <svg viewBox="0 0 36 36" width="38" height="38" style="display:inline-block; vertical-align:middle;">
+    <circle cx="18" cy="18" r="16" fill="#8B5A2B" stroke="#5C3A21" stroke-width="2"/>
+    <circle cx="18" cy="18" r="12" fill="#A0522D" stroke="#D2B48C" stroke-width="1.5" stroke-dasharray="3,2"/>
+    <path d="M12 18h12M14 14h8M14 22h8" stroke="#F5DEB3" stroke-width="2" stroke-linecap="round"/>
+  </svg>
+`;
+
+const EMBLEMAS = [
+  { id: 1, nome: "Medalha de Madeira", icone: SVG_MEDALHA_MADEIRA, kitsNecessarios: 1, mensagem: "Primeiro kit finalizado! As sinapses de decodificação de variáveis estão ativas." },
+  { id: 2, nome: "Medalha de Ferro", icone: "⛓️", kitsNecessarios: 2, mensagem: "Dois kits dominados! A extração de dados e conversão de unidades tornam-se rotineiras." },
+  { id: 3, nome: "Medalha de Bronze", icone: "🥉", kitsNecessarios: 3, mensagem: "Três kits concluídos! A hesitação diante do enunciado desaparece por completo." },
+  { id: 4, nome: "Medalha de Prata", icone: "🥈", kitsNecessarios: 4, mensagem: "Quatro kits vencidos! Retenção acima de 80% das operações algébricas." },
+  { id: 5, nome: "Medalha de Ouro", icone: "🥇", kitsNecessarios: 5, mensagem: "Cinco kits! Ritmo e precisão de vestibulando de elite." },
+  { id: 6, nome: "Medalha de Diamante", icone: "💎", kitsNecessarios: 6, mensagem: "Maestria Suprema! Todos os 6 kits concluídos. Memória permanente assegurada!" }
+];
+
+const DATABASE_EQUACOES = [
+  { badge: "MRU", concept: "Velocidade Média", katex: "v_m = \\cfrac{\\Delta S}{\\Delta t}", desc: "Variação de posição pelo tempo sem aceleração." },
+  { badge: "MRU", concept: "Posição (Sorvete)", katex: "S = S_0 + v \\cdot t", desc: "Localização final do móvel no MRU." },
+  { badge: "MRUV", concept: "Aceleração Escalar Média", katex: "a_m = \\cfrac{\\Delta v}{\\Delta t}", desc: "Taxa com que a velocidade é alterada." },
+  { badge: "MRUV", concept: "Velocidade (Vovô Ateu)", katex: "v = v_0 + a \\cdot t", desc: "Velocidade no instante t sob aceleração constante." },
+  { badge: "MRUV", concept: "Deslocamento (Sorvetão)", katex: "\\Delta S = v_0 \\cdot t + \\cfrac{1}{2} \\cdot a \\cdot t^2", desc: "Distância percorrida com aceleração conhecida." },
+  { badge: "MRUV", concept: "Equação de Torricelli", katex: "v^2 = v_0^2 + 2 \\cdot a \\cdot \\Delta S", desc: "Relação fundamental quando o tempo não é informado." },
+  { badge: "MRUV", concept: "Velocidade Média no MUV", katex: "v_m = \\cfrac{v_0 + v}{2}", desc: "Média aritmética das velocidades nos extremos." }
+];
+
+const TEMPOS_AVALIACAO = {
+  facil: 8 * 60,
+  medio: 10 * 60,
+  dificil: 12 * 60,
+  revisao: 15 * 60
+};
+
+// ===== KITS DE EXERCÍCIOS =====
+const kit1 = [
+  {
+    id: "K1_Q1", tipo: "facil", nivelTexto: "Fácil (2F)",
+    enunciado: "Um ciclista trafega em linha reta com velocidade escalar constante de $8\\text{ m/s}$. Sabendo que ele partiu da posição $S_0 = 35\\text{ m}$, qual será a sua posição após $10\\text{ segundos}$?",
+    dica1: "Identifique quem é o ponto de partida ($S_0 = 35\\text{ m}$), a velocidade constante ($v = 8\\text{ m/s}$) e o tempo ($t = 10\\text{ s}$).",
+    dica2: "A velocidade é uniforme (sem aceleração). Aplique a função horária do MRU: $S = S_0 + v \\cdot t$.",
+    dica3: "Multiplique $8 \\times 10 = 80$ e some com $35$ para obter o valor exato.",
+    gabarito: {
+      fase1: ["$v = 8\\text{ m/s}$", "$S_0 = 35\\text{ m}$", "$t = 10\\text{ s}$", "Incógnita: $S$"],
+      fase2: "Função Horária do MRU: $S = S_0 + v \\cdot t$",
+      fase3: ["$S = 35 + 8 \\cdot 10$", "$S = 35 + 80$", "$\\mathbf{S = 115\\text{ m}}$"]
+    }
+  },
+  {
+    id: "K1_Q2", tipo: "facil", nivelTexto: "Fácil (2F)",
+    enunciado: "Um veículo com velocidade de $14\\text{ m/s}$ acelera a uma taxa constante de $3\\text{ m/s}^2$ durante $7\\text{ segundos}$. Qual a velocidade final atingida pelo veículo?",
+    dica1: "Separe os dados: $v_0 = 14\\text{ m/s}$, taxa de aceleração $a = 3\\text{ m/s}^2$ e tempo decorrido $t = 7\\text{ s}$.",
+    dica2: "Trata-se de MRUV com aceleração constante: use a função horária da velocidade $v = v_0 + a \\cdot t$.",
+    dica3: "Calcule a parcela do ganho de velocidade ($3 \\times 7 = 21$) e adicione aos $14$ iniciais.",
+    gabarito: {
+      fase1: ["$v_0 = 14\\text{ m/s}$", "$a = 3\\text{ m/s}^2$", "$t = 7\\text{ s}$", "Incógnita: $v$"],
+      fase2: "Função da Velocidade: $v = v_0 + a \\cdot t$",
+      fase3: ["$v = 14 + 3 \\cdot 7$", "$v = 14 + 21$", "$\\mathbf{v = 35\\text{ m/s}}$"]
+    }
+  },
+  {
+    id: "K1_Q3", tipo: "medio", nivelTexto: "Intermediário (2I)",
+    enunciado: "Um trem de passageiros mantém velocidade escalar constante de $22\\text{ m/s}$. Qual a distância total percorrida pelo trem, em metros, durante uma viagem de $5\\text{ minutos}$?",
+    dica1: "Atenção à unidade: converta $5\\text{ minutos}$ para segundos ($5 \\times 60 = 300\\text{ s}$) e anote $v = 22\\text{ m/s}$.",
+    dica2: "Velocidade constante sem aceleração: use a definição de velocidade média $\\Delta S = v \\cdot \\Delta t$.",
+    dica3: "Multiplique $22 \\times 300$. Dica mental: $22 \\times 3 = 66$, depois acrescente os dois zeros.",
+    gabarito: {
+      fase1: ["$v = 22\\text{ m/s}$", "$\\Delta t = 5\\text{ min} = 300\\text{ s}$", "Incógnita: $\\Delta S$"],
+      fase2: "Equação: $\\Delta S = v \\cdot \\Delta t$",
+      fase3: ["$\\Delta S = 22 \\cdot 300$", "$\\mathbf{\\Delta S = 6.600\\text{ m}}$"]
+    }
+  },
+  {
+    id: "K1_Q4", tipo: "medio", nivelTexto: "Intermediário (2I)",
+    enunciado: "Um atleta em arrancada parte do repouso e mantém aceleração constante de $4\\text{ m/s}^2$ até atingir a distância de $32\\text{ metros}$. Qual a velocidade atingida ao final desse percurso?",
+    dica1: "'Parte do repouso' significa $v_0 = 0$. Temos $a = 4\\text{ m/s}^2$ e deslocamento $\\Delta S = 32\\text{ m}$.",
+    dica2: "Como o enunciado não informa nem pede o tempo decorrido, use a Equação de Torricelli: $v^2 = v_0^2 + 2 \\cdot a \\cdot \\Delta S$.",
+    dica3: "$v^2 = 0 + 2 \\cdot 4 \\cdot 32 = 256$. Tire a raiz quadrada de 256.",
+    gabarito: {
+      fase1: ["$v_0 = 0$", "$a = 4\\text{ m/s}^2$", "$\\Delta S = 32\\text{ m}$", "Incógnita: $v$"],
+      fase2: "Equação de Torricelli: $v^2 = v_0^2 + 2 \\cdot a \\cdot \\Delta S$",
+      fase3: ["$v^2 = 0 + 2 \\cdot 4 \\cdot 32 = 256$", "$v = \\sqrt{256}$", "$\\mathbf{v = 16\\text{ m/s}}$"]
+    }
+  },
+  {
+    id: "K1_Q5", tipo: "dificil", nivelTexto: "Difícil (1D)",
+    enunciado: "Dois automóveis, A e B, movem-se na mesma rodovia no mesmo sentido com velocidades constantes. No instante $t = 0$, o automóvel A está na posição $S_A = 60\\text{ m}$ com velocidade de $24\\text{ m/s}$, enquanto o automóvel B está na posição $S_B = 180\\text{ m}$ com velocidade de $16\\text{ m/s}$. Em que instante $t$ e em qual posição $S$ o automóvel A alcançará o automóvel B?",
+    dica1: "Extraia as funções de posição: $S_A = 60 + 24t$ e $S_B = 180 + 16t$. O encontro ocorre quando $S_A = S_B$.",
+    dica2: "Iguale as duas funções horárias: $60 + 24t = 180 + 16t$.",
+    dica3: "Agrupe os termos em $t$: $24t - 16t = 180 - 60 \\implies 8t = 120$. Depois substitua o tempo achado em qualquer uma das equações.",
+    gabarito: {
+      fase1: ["$S_A = 60 + 24t$", "$S_B = 180 + 16t$", "Condição: $S_A = S_B$"],
+      fase2: "Igualdade: $60 + 24t = 180 + 16t$",
+      fase3: ["$8t = 120 \\implies \\mathbf{t = 15\\text{ s}}$", "$S = 60 + 24(15) \\implies \\mathbf{S = 420\\text{ m}}$"]
+    }
+  }
+];
+
+const kit2 = [
+  {
+    id: "K2_Q1", tipo: "facil", nivelTexto: "Fácil (2F)",
+    enunciado: "Um corredor percorre uma pista retilínea a uma velocidade constante de $6\\text{ m/s}$. Sabendo que ele partiu da origem ($S_0 = 0$), quanto tempo ele levará para atingir a marca de $168\\text{ metros}$?",
+    dica1: "Identifique: deslocamento $\\Delta S = 168\\text{ m}$ e velocidade constante $v = 6\\text{ m/s}$.",
+    dica2: "Isole o tempo na relação do MRU: $\\Delta t = \\cfrac{\\Delta S}{v}$.",
+    dica3: "Divida 168 por 6.",
+    gabarito: {
+      fase1: ["$S_0 = 0$", "$S = 168\\text{ m}$", "$v = 6\\text{ m/s}$"],
+      fase2: "Equação: $\\Delta t = \\cfrac{\\Delta S}{v}$",
+      fase3: ["$\\Delta t = \\cfrac{168}{6}$", "$\\mathbf{\\Delta t = 28\\text{ s}}$"]
+    }
+  },
+  {
+    id: "K2_Q2", tipo: "facil", nivelTexto: "Fácil (2F)",
+    enunciado: "Um móvel parte do repouso com aceleração constante de $6\\text{ m/s}^2$. Qual o deslocamento escalar realizado por esse corpo nos primeiros $4\\text{ segundos}$ de movimento?",
+    dica1: "Dados: parte do repouso ($v_0 = 0$), aceleração $a = 6\\text{ m/s}^2$ e tempo $t = 4\\text{ s}$.",
+    dica2: "Aplique a função do deslocamento (Sorvetão): $\\Delta S = v_0 t + \\cfrac{1}{2} a t^2$.",
+    dica3: "Como $v_0 = 0$, calcule apenas $\\cfrac{1}{2} \\cdot 6 \\cdot 4^2 = 3 \\times 16$.",
+    gabarito: {
+      fase1: ["$v_0 = 0$", "$a = 6\\text{ m/s}^2$", "$t = 4\\text{ s}$"],
+      fase2: "Função: $\\Delta S = \\cfrac{1}{2} a t^2$",
+      fase3: ["$\\Delta S = \\cfrac{1}{2} \\cdot 6 \\cdot 16$", "$\\mathbf{\\Delta S = 48\\text{ m}}$"]
+    }
+  },
+  {
+    id: "K2_Q3", tipo: "medio", nivelTexto: "Intermediário (2I)",
+    enunciado: "Um caminhão trafega a uma velocidade constante de $108\\text{ km/h}$. Quantos metros ele percorrerá durante um intervalo de tempo de $12\\text{ segundos}$?",
+    dica1: "Converta a velocidade para m/s dividindo por 3,6: $108 / 3{,}6 = 30\\text{ m/s}$. O tempo é $12\\text{ s}$.",
+    dica2: "No MRU: $\\Delta S = v \\cdot \\Delta t$.",
+    dica3: "Multiplique $30 \\times 12$.",
+    gabarito: {
+      fase1: ["$v = 108\\text{ km/h} = 30\\text{ m/s}$", "$\\Delta t = 12\\text{ s}$"],
+      fase2: "Equação: $\\Delta S = v \\cdot \\Delta t$",
+      fase3: ["$\\Delta S = 30 \\cdot 12$", "$\\mathbf{\\Delta S = 360\\text{ m}}$"]
+    }
+  },
+  {
+    id: "K2_Q4", tipo: "medio", nivelTexto: "Intermediário (2I)",
+    enunciado: "Um carro se desloca a $24\\text{ m/s}$ quando o motorista avista um obstáculo e aciona os freios, sofrendo desaceleração constante de $4\\text{ m/s}^2$ até parar completamente. Qual foi a distância percorrida durante a frenagem?",
+    dica1: "Velocidade inicial $v_0 = 24\\text{ m/s}$, parada final $v = 0$, aceleração de frenagem $a = -4\\text{ m/s}^2$.",
+    dica2: "Sem tempo fornecido: use Torricelli $v^2 = v_0^2 + 2 \\cdot a \\cdot \\Delta S$.",
+    dica3: "$0 = 24^2 + 2(-4)\\Delta S \\implies 8\\Delta S = 576$. Divida 576 por 8.",
+    gabarito: {
+      fase1: ["$v_0 = 24\\text{ m/s}$", "$v = 0$", "$a = -4\\text{ m/s}^2$"],
+      fase2: "Torricelli: $v^2 = v_0^2 + 2 a \\Delta S$",
+      fase3: ["$0 = 576 - 8\\Delta S \\implies 8\\Delta S = 576$", "$\\mathbf{\\Delta S = 72\\text{ m}}$"]
+    }
+  },
+  {
+    id: "K2_Q5", tipo: "dificil", nivelTexto: "Difícil (1D)",
+    enunciado: "Dois blocos sobre um trilho retilíneo movem-se um ao encontro do outro. No instante $t = 0$, o bloco 1 parte de $S_1 = 40\\text{ m}$ com velocidade de $+12\\text{ m/s}$, e o bloco 2 parte de $S_2 = 250\\text{ m}$ com velocidade de $18\\text{ m/s}$ em sentido oposto ($-18\\text{ m/s}$). Em qual instante e posição ocorre a colisão?",
+    dica1: "Sentidos opostos: monte $S_1 = 40 + 12t$ e $S_2 = 250 - 18t$.",
+    dica2: "Condição de colisão: iguale as posições $S_1 = S_2$.",
+    dica3: "$40 + 12t = 250 - 18t \\implies 30t = 210$. Encontre $t$ e calcule a posição.",
+    gabarito: {
+      fase1: ["$S_1 = 40 + 12t$", "$S_2 = 250 - 18t$"],
+      fase2: "Igualdade: $S_1 = S_2$",
+      fase3: ["$30t = 210 \\implies \\mathbf{t = 7\\text{ s}}$", "$S = 40 + 12(7) \\implies \\mathbf{S = 124\\text{ m}}$"]
+    }
+  }
+];
+
+const kit3 = [
+  {
+    id: "K3_Q1", tipo: "facil", nivelTexto: "Fácil (2F)",
+    enunciado: "Uma partícula tem sua velocidade alterada de $5\\text{ m/s}$ para $29\\text{ m/s}$ de forma constante em um período de $8\\text{ segundos}$. Determine a aceleração escalar média da partícula.",
+    dica1: "Calcule a variação da velocidade: $\\Delta v = 29 - 5 = 24\\text{ m/s}$ e anote $\\Delta t = 8\\text{ s}$.",
+    dica2: "Definição de aceleração média: $a_m = \\cfrac{\\Delta v}{\\Delta t}$.",
+    dica3: "Divida 24 por 8.",
+    gabarito: {
+      fase1: ["$v_0 = 5\\text{ m/s}$", "$v = 29\\text{ m/s}$", "$\\Delta t = 8\\text{ s}$"],
+      fase2: "Aceleração: $a_m = \\cfrac{\\Delta v}{\\Delta t}$",
+      fase3: ["$a_m = \\cfrac{24}{8}$", "$\\mathbf{a_m = 3\\text{ m/s}^2}$"]
+    }
+  },
+  {
+    id: "K3_Q2", tipo: "facil", nivelTexto: "Fácil (2F)",
+    enunciado: "Um barco a motor navega em águas calmas a uma velocidade constante de $7\\text{ m/s}$. Partindo da posição $S_0 = 15\\text{ m}$, em qual instante de tempo ele atingirá a posição $S = 99\\text{ m}$?",
+    dica1: "Posição inicial $S_0 = 15\\text{ m}$, final $S = 99\\text{ m}$ e velocidade $v = 7\\text{ m/s}$.",
+    dica2: "Função horária da posição: $S = S_0 + v \\cdot t$.",
+    dica3: "$99 = 15 + 7t \\implies 7t = 84$. Divida 84 por 7.",
+    gabarito: {
+      fase1: ["$S_0 = 15\\text{ m}$", "$S = 99\\text{ m}$", "$v = 7\\text{ m/s}$"],
+      fase2: "Função Horária: $S = S_0 + v \\cdot t$",
+      fase3: ["$7t = 84 \\implies t = \\cfrac{84}{7}$", "$\\mathbf{t = 12\\text{ s}}$"]
+    }
+  },
+  {
+    id: "K3_Q3", tipo: "medio", nivelTexto: "Intermediário (2I)",
+    enunciado: "Um trem acelera uniformemente saindo de uma estação com velocidade de $18\\text{ km/h}$ até atingir $90\\text{ km/h}$. Qual a velocidade média do trem durante essa aceleração, em m/s?",
+    dica1: "Converta ambas para m/s dividindo por 3,6: $18 / 3{,}6 = 5\\text{ m/s}$ e $90 / 3{,}6 = 25\\text{ m/s}$.",
+    dica2: "No MUV, a velocidade média é a média aritmética dos extremos: $v_m = \\cfrac{v_0 + v}{2}$.",
+    dica3: "Some 5 com 25 e divida por 2.",
+    gabarito: {
+      fase1: ["$v_0 = 5\\text{ m/s}$", "$v = 25\\text{ m/s}$"],
+      fase2: "Velocidade Média no MUV: $v_m = \\cfrac{v_0 + v}{2}$",
+      fase3: ["$v_m = \\cfrac{5 + 25}{2} = \\cfrac{30}{2}$", "$\\mathbf{v_m = 15\\text{ m/s}}$"]
+    }
+  },
+  {
+    id: "K3_Q4", tipo: "medio", nivelTexto: "Intermediário (2I)",
+    enunciado: "Um carro trafega a $72\\text{ km/h}$ quando o sinal fecha. O condutor freia uniformemente com desaceleração de $5\\text{ m/s}^2$. Quantos segundos o veículo levará até parar completamente?",
+    dica1: "$72\\text{ km/h} = 20\\text{ m/s}$. Ao parar: $v = 0$. Aceleração: $a = -5\\text{ m/s}^2$.",
+    dica2: "Função horária da velocidade: $v = v_0 + a \\cdot t$.",
+    dica3: "$0 = 20 - 5t \\implies 5t = 20$. Divida 20 por 5.",
+    gabarito: {
+      fase1: ["$v_0 = 20\\text{ m/s}$", "$v = 0$", "$a = -5\\text{ m/s}^2$"],
+      fase2: "Função: $v = v_0 + a \\cdot t$",
+      fase3: ["$5t = 20$", "$\\mathbf{t = 4\\text{ s}}$"]
+    }
+  },
+  {
+    id: "K3_Q5", tipo: "dificil", nivelTexto: "Difícil (1D)",
+    enunciado: "Em uma pista reta, o carro Alfa parte de $S_A = 100\\text{ m}$ com velocidade constante de $28\\text{ m/s}$. À sua frente, o carro Beta parte de $S_B = 220\\text{ m}$ com velocidade de $16\\text{ m/s}$ no mesmo sentido. Determine em que instante de tempo e em qual posição o carro Alfa alcançará o carro Beta.",
+    dica1: "Construa as posições: $S_A = 100 + 28t$ e $S_B = 220 + 16t$.",
+    dica2: "Iguale as posições no encontro: $S_A = S_B$.",
+    dica3: "$100 + 28t = 220 + 16t \\implies 12t = 120$. Encontre $t$ e a posição $S$.",
+    gabarito: {
+      fase1: ["$S_A = 100 + 28t$", "$S_B = 220 + 16t$"],
+      fase2: "Igualdade: $S_A = S_B$",
+      fase3: ["$12t = 120 \\implies \\mathbf{t = 10\\text{ s}}$", "$S = 100 + 28(10) \\implies \\mathbf{S = 380\\text{ m}}$"]
+    }
+  }
+];
+
+const kit4 = [
+  {
+    id: "K4_Q1", tipo: "facil", nivelTexto: "Fácil (2F)",
+    enunciado: "Um drone parte com velocidade de $2\\text{ m/s}$ e acelera a uma taxa constante de $5\\text{ m/s}^2$. Qual será o deslocamento total realizado pelo drone após $4\\text{ segundos}$ de voo?",
+    dica1: "Dados: $v_0 = 2\\text{ m/s}$, $a = 5\\text{ m/s}^2$ e $t = 4\\text{ s}$.",
+    dica2: "Função horária do deslocamento: $\\Delta S = v_0 t + \\cfrac{1}{2} a t^2$.",
+    dica3: "$v_0 t = 2(4) = 8$. Parcela acelerada: $\\cfrac{1}{2}(5)(16) = 40$. Some 8 com 40.",
+    gabarito: {
+      fase1: ["$v_0 = 2\\text{ m/s}$", "$a = 5\\text{ m/s}^2$", "$t = 4\\text{ s}$"],
+      fase2: "Deslocamento: $\\Delta S = v_0 t + \\cfrac{1}{2} a t^2$",
+      fase3: ["$\\Delta S = 8 + 40$", "$\\mathbf{\\Delta S = 48\\text{ m}}$"]
+    }
+  },
+  {
+    id: "K4_Q2", tipo: "facil", nivelTexto: "Fácil (2F)",
+    enunciado: "A função horária da posição de um carrinho elétrico em trajetória retilínea é dada por $S(t) = 45 + 9t$ (unidades no S.I.). Em que instante o carrinho estará na posição $S = 117\\text{ metros}$?",
+    dica1: "Identifique a equação $S = 45 + 9t$ e a posição-alvo $S = 117\\text{ m}$.",
+    dica2: "Substitua 117 no lugar de $S$: $117 = 45 + 9t$.",
+    dica3: "$9t = 117 - 45 = 72$. Divida 72 por 9.",
+    gabarito: {
+      fase1: ["$S(t) = 45 + 9t$", "$S = 117\\text{ m}$"],
+      fase2: "Equação: $117 = 45 + 9t$",
+      fase3: ["$9t = 72 \\implies t = \\cfrac{72}{9}$", "$\\mathbf{t = 8\\text{ s}}$"]
+    }
+  },
+  {
+    id: "K4_Q3", tipo: "medio", nivelTexto: "Intermediário (2I)",
+    enunciado: "Uma composição metroviária aproxima-se da estação a $54\\text{ km/h}$. Os freios são ativados gerando desaceleração uniforme de módulo $1{,}5\\text{ m/s}^2$ até a parada completa. Determine a distância percorrida pelo metrô desde o início da frenagem até parar.",
+    dica1: "Converta: $54\\text{ km/h} = 15\\text{ m/s}$. Parada final: $v = 0$. Aceleração: $a = -1{,}5\\text{ m/s}^2$.",
+    dica2: "Sem menção ao tempo: utilize a Equação de Torricelli $v^2 = v_0^2 + 2 a \\Delta S$.",
+    dica3: "$0 = 15^2 + 2(-1{,}5)\\Delta S \\implies 3\\Delta S = 225$. Divida 225 por 3.",
+    gabarito: {
+      fase1: ["$v_0 = 15\\text{ m/s}$", "$v = 0$", "$a = -1{,}5\\text{ m/s}^2$"],
+      fase2: "Torricelli: $v^2 = v_0^2 + 2 a \\Delta S$",
+      fase3: ["$0 = 225 - 3\\Delta S \\implies 3\\Delta S = 225$", "$\\mathbf{\\Delta S = 75\\text{ m}}$"]
+    }
+  },
+  {
+    id: "K4_Q4", tipo: "medio", nivelTexto: "Intermediário (2I)",
+    enunciado: "Um navio de carga navega a uma velocidade uniforme de $8\\text{ m/s}$. Sabendo que ele viajou durante $15\\text{ minutos}$, qual a distância total percorrida em metros?",
+    dica1: "Converta $15\\text{ minutos}$ para segundos ($15 \\times 60 = 900\\text{ s}$) e note que $v = 8\\text{ m/s}$.",
+    dica2: "Velocidade constante: $\\Delta S = v \\cdot \\Delta t$.",
+    dica3: "Multiplique 8 por 900.",
+    gabarito: {
+      fase1: ["$v = 8\\text{ m/s}$", "$\\Delta t = 900\\text{ s}$"],
+      fase2: "Equação: $\\Delta S = v \\cdot \\Delta t$",
+      fase3: ["$\\Delta S = 8 \\cdot 900$", "$\\mathbf{\\Delta S = 7.200\\text{ m}}$"]
+    }
+  },
+  {
+    id: "K4_Q5", tipo: "dificil", nivelTexto: "Difícil (1D)",
+    enunciado: "Dois ciclistas trafegam em sentidos opostos numa ciclovia retilínea. No instante $t = 0$, o ciclista 1 está em $S_1 = 50\\text{ m}$ com velocidade constante de $+9\\text{ m/s}$ e o ciclista 2 está em $S_2 = 320\\text{ m}$ com velocidade de $6\\text{ m/s}$ em sentido negativo ($-6\\text{ m/s}$). Determine após quantos segundos e em qual posição ocorrerá o cruzamento entre eles.",
+    dica1: "Funções de posição: $S_1 = 50 + 9t$ e $S_2 = 320 - 6t$.",
+    dica2: "Condição de encontro: $S_1 = S_2$.",
+    dica3: "$50 + 9t = 320 - 6t \\implies 15t = 270$. Encontre $t$ e depois a posição.",
+    gabarito: {
+      fase1: ["$S_1 = 50 + 9t$", "$S_2 = 320 - 6t$"],
+      fase2: "Igualdade: $S_1 = S_2$",
+      fase3: ["$15t = 270 \\implies \\mathbf{t = 18\\text{ s}}$", "$S = 50 + 9(18) \\implies \\mathbf{S = 212\\text{ m}}$"]
+    }
+  }
+];
+
+const kit5 = [
+  {
+    id: "K5_Q1", tipo: "facil", nivelTexto: "Fácil (2F)",
+    enunciado: "Um móvel executa MRU com posição inicial $S_0 = 80\\text{ m}$ e velocidade constante de $14\\text{ m/s}$. Qual a sua posição após $6\\text{ segundos}$?",
+    dica1: "Identifique: $S_0 = 80\\text{ m}$, $v = 14\\text{ m/s}$ e $t = 6\\text{ s}$.",
+    dica2: "Função horária do MRU: $S = S_0 + v \\cdot t$.",
+    dica3: "$14 \\times 6 = 84$. Some com 80.",
+    gabarito: {
+      fase1: ["$S_0 = 80\\text{ m}$", "$v = 14\\text{ m/s}$", "$t = 6\\text{ s}$"],
+      fase2: "Função: $S = S_0 + v \\cdot t$",
+      fase3: ["$S = 80 + 14(6) = 80 + 84$", "$\\mathbf{S = 164\\text{ m}}$"]
+    }
+  },
+  {
+    id: "K5_Q2", tipo: "facil", nivelTexto: "Fácil (2F)",
+    enunciado: "Um automóvel parte do repouso e, com aceleração escalar constante de $5\\text{ m/s}^2$, acelera durante $7\\text{ segundos}$. Qual a velocidade escalar alcançada ao término desse tempo?",
+    dica1: "Dados: parte do repouso ($v_0 = 0$), aceleração $a = 5\\text{ m/s}^2$ e tempo $t = 7\\text{ s}$.",
+    dica2: "Função da velocidade: $v = v_0 + a \\cdot t$.",
+    dica3: "Como $v_0 = 0$, multiplique diretamente 5 por 7.",
+    gabarito: {
+      fase1: ["$v_0 = 0$", "$a = 5\\text{ m/s}^2$", "$t = 7\\text{ s}$"],
+      fase2: "Função: $v = v_0 + a \\cdot t$",
+      fase3: ["$v = 0 + 5(7)$", "$\\mathbf{v = 35\\text{ m/s}}$"]
+    }
+  },
+  {
+    id: "K5_Q3", tipo: "medio", nivelTexto: "Intermediário (2I)",
+    enunciado: "Um avião de caça parte do repouso sobre a pista de um porta-aviões e atinge a velocidade de decolagem de $216\\text{ km/h}$ em um trajeto de $90\\text{ metros}$. Qual a aceleração uniforme transmitida pela catapulta ao caça?",
+    dica1: "Converta $216\\text{ km/h}$ para m/s ($216 / 3{,}6 = 60\\text{ m/s}$). $v_0 = 0$ e $\\Delta S = 90\\text{ m}$.",
+    dica2: "Sem informação do tempo: utilize a Equação de Torricelli $v^2 = v_0^2 + 2 a \\Delta S$.",
+    dica3: "$60^2 = 0 + 2 \\cdot a \\cdot 90 \\implies 3.600 = 180a$. Divida 3.600 por 180.",
+    gabarito: {
+      fase1: ["$v_0 = 0$", "$v = 60\\text{ m/s}$", "$\\Delta S = 90\\text{ m}$"],
+      fase2: "Torricelli: $v^2 = v_0^2 + 2 a \\Delta S$",
+      fase3: ["$3.600 = 180 a \\implies a = \\cfrac{3.600}{180}$", "$\\mathbf{a = 20\\text{ m/s}^2}$"]
+    }
+  },
+  {
+    id: "K5_Q4", tipo: "medio", nivelTexto: "Intermediário (2I)",
+    enunciado: "Uma esteira transportadora industrial opera com velocidade contínua de $3\\text{ m/s}$. Quantos metros de material ela transporta durante um ciclo de funcionamento de $4\\text{ minutos}$?",
+    dica1: "Converta $4\\text{ minutos}$ em segundos ($4 \\times 60 = 240\\text{ s}$). $v = 3\\text{ m/s}$.",
+    dica2: "MRU: $\\Delta S = v \\cdot \\Delta t$.",
+    dica3: "Multiplique 3 por 240.",
+    gabarito: {
+      fase1: ["$v = 3\\text{ m/s}$", "$\\Delta t = 240\\text{ s}$"],
+      fase2: "Equação: $\\Delta S = v \\cdot \\Delta t$",
+      fase3: ["$\\Delta S = 3 \\cdot 240$", "$\\mathbf{\\Delta S = 720\\text{ m}}$"]
+    }
+  },
+  {
+    id: "K5_Q5", tipo: "dificil", nivelTexto: "Difícil (1D)",
+    enunciado: "Dois atletas treinam na mesma raia retilínea. O corredor A parte de $S_A = 30\\text{ m}$ com velocidade de $11\\text{ m/s}$. Mais adiante, o corredor B parte de $S_B = 110\\text{ m}$ com velocidade de $7\\text{ m/s}$ no mesmo sentido. Em quanto tempo e em qual posição o corredor A alcançará o corredor B?",
+    dica1: "Monte $S_A = 30 + 11t$ e $S_B = 110 + 7t$.",
+    dica2: "Condição de alcance: $S_A = S_B$.",
+    dica3: "$30 + 11t = 110 + 7t \\implies 4t = 80$. Encontre $t$ e calcule a posição.",
+    gabarito: {
+      fase1: ["$S_A = 30 + 11t$", "$S_B = 110 + 7t$"],
+      fase2: "Igualdade: $S_A = S_B$",
+      fase3: ["$4t = 80 \\implies \\mathbf{t = 20\\text{ s}}$", "$S = 30 + 11(20) \\implies \\mathbf{S = 250\\text{ m}}$"]
+    }
+  }
+];
+
+const kit6 = [
+  {
+    id: "K6_Q1", tipo: "facil", nivelTexto: "Fácil (2F)",
+    enunciado: "Um veículo com velocidade de $12\\text{ m/s}$ acelera uniformemente a $4\\text{ m/s}^2$ durante $5\\text{ segundos}$. Qual o deslocamento total percorrido pelo veículo nesse intervalo de tempo?",
+    dica1: "Dados: $v_0 = 12\\text{ m/s}$, $a = 4\\text{ m/s}^2$ e $t = 5\\text{ s}$.",
+    dica2: "Função do deslocamento (Sorvetão): $\\Delta S = v_0 t + \\cfrac{1}{2} a t^2$.",
+    dica3: "$12(5) = 60$ e $\\cfrac{1}{2}(4)(25) = 50$. Some 60 com 50.",
+    gabarito: {
+      fase1: ["$v_0 = 12\\text{ m/s}$", "$a = 4\\text{ m/s}^2$", "$t = 5\\text{ s}$"],
+      fase2: "Deslocamento: $\\Delta S = v_0 t + \\cfrac{1}{2} a t^2$",
+      fase3: ["$\\Delta S = 60 + 50$", "$\\mathbf{\\Delta S = 110\\text{ m}}$"]
+    }
+  },
+  {
+    id: "K6_Q2", tipo: "facil", nivelTexto: "Fácil (2F)",
+    enunciado: "Um ciclista viaja em linha reta com velocidade constante de $15\\text{ m/s}$. Quanto tempo ele levará para percorrer uma distância de $450\\text{ metros}$?",
+    dica1: "Dados: velocidade $v = 15\\text{ m/s}$ e distância $\\Delta S = 450\\text{ m}$.",
+    dica2: "Equação de tempo: $\\Delta t = \\cfrac{\\Delta S}{v}$.",
+    dica3: "Divida 450 por 15.",
+    gabarito: {
+      fase1: ["$v = 15\\text{ m/s}$", "$\\Delta S = 450\\text{ m}$"],
+      fase2: "Equação: $\\Delta t = \\cfrac{\\Delta S}{v}$",
+      fase3: ["$\\Delta t = \\cfrac{450}{15}$", "$\\mathbf{\\Delta t = 30\\text{ s}}$"]
+    }
+  },
+  {
+    id: "K6_Q3", tipo: "medio", nivelTexto: "Intermediário (2I)",
+    enunciado: "Um automóvel esportivo acelera de $72\\text{ km/h}$ para $144\\text{ km/h}$ em um intervalo de $4\\text{ segundos}$. Qual a sua aceleração escalar média, em m/s²?",
+    dica1: "Converta ambas as velocidades dividindo por 3,6: $72 / 3{,}6 = 20\\text{ m/s}$ e $144 / 3{,}6 = 40\\text{ m/s}$.",
+    dica2: "Aceleração média: $a_m = \\cfrac{\\Delta v}{\\Delta t} = \\cfrac{40 - 20}{4}$.",
+    dica3: "Divida 20 por 4.",
+    gabarito: {
+      fase1: ["$v_0 = 20\\text{ m/s}$", "$v = 40\\text{ m/s}$", "$\\Delta t = 4\\text{ s}$"],
+      fase2: "Aceleração: $a_m = \\cfrac{v - v_0}{\\Delta t}$",
+      fase3: ["$a_m = \\cfrac{20}{4}$", "$\\mathbf{a_m = 5\\text{ m/s}^2}$"]
+    }
+  },
+  {
+    id: "K6_Q4", tipo: "medio", nivelTexto: "Intermediário (2I)",
+    enunciado: "Um caminhão trafega a $108\\text{ km/h}$ quando o motorista pisa nos freios de emergência, imprimindo desaceleração constante de $3\\text{ m/s}^2$ até a parada total. Calcule a distância percorrida pelo caminhão durante essa frenagem.",
+    dica1: "Converta $108\\text{ km/h} = 30\\text{ m/s}$. Ao parar: $v = 0$. Taxa: $a = -3\\text{ m/s}^2$.",
+    dica2: "Sem menção ao tempo: Equação de Torricelli $v^2 = v_0^2 + 2 a \\Delta S$.",
+    dica3: "$0 = 30^2 + 2(-3)\\Delta S \\implies 6\\Delta S = 900$. Divida 900 por 6.",
+    gabarito: {
+      fase1: ["$v_0 = 30\\text{ m/s}$", "$v = 0$", "$a = -3\\text{ m/s}^2$"],
+      fase2: "Torricelli: $v^2 = v_0^2 + 2 a \\Delta S$",
+      fase3: ["$6\\Delta S = 900 \\implies \\Delta S = \\cfrac{900}{6}$", "$\\mathbf{\\Delta S = 150\\text{ m}}$"]
+    }
+  },
+  {
+    id: "K6_Q5", tipo: "dificil", nivelTexto: "Difícil (1D)",
+    enunciado: "Dois trens em trilhos paralelos movem-se em sentidos opostos. No instante $t = 0$, o trem 1 está na posição $S_1 = 100\\text{ m}$ com velocidade de $+22\\text{ m/s}$ e o trem 2 está na posição $S_2 = 580\\text{ m}$ com velocidade de $18\\text{ m/s}$ no sentido oposto ($-18\\text{ m/s}$). Em que instante de tempo e posição as frentes dos dois trens se cruzam?",
+    dica1: "Sentidos opostos: $S_1 = 100 + 22t$ e $S_2 = 580 - 18t$.",
+    dica2: "Iguale as funções no cruzamento: $S_1 = S_2$.",
+    dica3: "$100 + 22t = 580 - 18t \\implies 40t = 480$. Calcule $t$ e a posição.",
+    gabarito: {
+      fase1: ["$S_1 = 100 + 22t$", "$S_2 = 580 - 18t$"],
+      fase2: "Igualdade: $S_1 = S_2$",
+      fase3: ["$40t = 480 \\implies \\mathbf{t = 12\\text{ s}}$", "$S = 100 + 22(12) \\implies \\mathbf{S = 364\\text{ m}}$"]
+    }
+  }
+];
+
+const BANCO_KITS = { 1: kit1, 2: kit2, 3: kit3, 4: kit4, 5: kit5, 6: kit6 };
+
+function obterQuestaoPorId(id) {
+  for (let k = 1; k <= 6; k++) {
+    const q = BANCO_KITS[k].find(item => item.id === id);
+    if (q) return q;
+  }
+  return null;
+}
+
+function obterTodasPorNivel(nivel) {
+  const lista = [];
+  for (let k = 1; k <= 6; k++) {
+    BANCO_KITS[k].forEach(q => {
+      if (q.tipo === nivel) lista.push(q);
+    });
+  }
+  return lista;
+}
+
+const TODAS_FACEIS = obterTodasPorNivel('facil');
+const TODAS_MEDIAS = obterTodasPorNivel('medio');
+const TODAS_DIFICEIS = obterTodasPorNivel('dificil');
+
+// ===== ESTADO DO SISTEMA (localStorage) =====
+const CHAVE_STORAGE = "CINEMATICA_TREINO_PROFA_V7";
+const ESTADO_PADRAO = {
+  nomeAluno: "",
+  acordoAceito: false,
+  barraRecolhida: false,
+  kitAtivo: 1,
+  respostas: {},
+  modoProfessor: false,
+  avaliacao: {
+    semente: null,
+    questoesIds: [],
+    etapaAtual: 'pre_prova',
+    tempoRestante: 0,
+    tempoTotalGasto: 0
+  }
+};
+
+let ESTADO = {};
+
+function carregarStorage() {
+  const salvo = localStorage.getItem(CHAVE_STORAGE);
+  if (salvo) {
+    try {
+      ESTADO = { ...ESTADO_PADRAO, ...JSON.parse(salvo) };
+    } catch (e) {
+      ESTADO = { ...ESTADO_PADRAO };
+    }
+  } else {
+    ESTADO = { ...ESTADO_PADRAO };
+  }
+  return ESTADO;
+}
+
+function salvarStorage() {
+  try {
+    localStorage.setItem(CHAVE_STORAGE, JSON.stringify(ESTADO));
+  } catch (e) {
+    console.error("Erro ao salvar LocalStorage:", e);
+  }
+}
+
+// ===== REGRAS DE CONCLUSÃO E EMBLEMAS =====
+function isQuestaoConcluida(id) {
+  return Boolean(ESTADO.respostas[id]?.concluida);
+}
+
+function isKitConcluido(kitNum) {
+  const questoes = BANCO_KITS[kitNum];
+  if (!questoes) return false;
+  return questoes.every(q => isQuestaoConcluida(q.id));
+}
+
+function getQuantidadeKitsConcluidos() {
+  let concluidos = 0;
+  for (let k = 1; k <= 6; k++) {
+    if (isKitConcluido(k)) concluidos++;
+  }
+  return concluidos;
+}
+
+function contarQuestoesConcluidas() {
+  return Object.values(ESTADO.respostas || {}).filter(r => r.concluida).length;
+}
+
+// ===== RESET POR KIT =====
+function resetarKitEspecifico(kitNum) {
+  if (!confirm(`Deseja realmente zerar o progresso do Kit ${kitNum}? Apenas os dados deste kit serão reiniciados.`)) {
+    return;
+  }
+  const questoes = BANCO_KITS[kitNum] || [];
+  questoes.forEach(q => {
+    delete ESTADO.respostas[q.id];
+  });
+  salvarStorage();
+  renderizarTudo();
+}
+window.resetarKitEspecifico = resetarKitEspecifico;
+
+// ===== LATEX FORMATTER =====
+function garantirRenderizacaoLatex(container) {
+  if (window.renderMathInElement && container) {
+    try {
+      window.renderMathInElement(container, {
+        delimiters: [
+          { left: "$$", right: "$$", display: true },
+          { left: "$", right: "$", display: false }
+        ],
+        throwOnError: false
+      });
+    } catch (e) {
+      console.warn("KaTeX render erro:", e);
+    }
+  }
+}
+
+// ===== CRONÔMETRO DAS 3 FASES =====
+let timerInterval = null;
+let cronoAtivo = { questId: null, faseNum: null, inicioTimestamp: null };
+
+function getDadosQuestao(questId) {
+  if (!ESTADO.respostas[questId]) {
+    ESTADO.respostas[questId] = {
+      fase1_t: null, fase2_t: null, fase3_t: null, tempoTotal: 0, concluida: false, dicasUsadas: 0
+    };
+  }
+  return ESTADO.respostas[questId];
+}
+
+function acaoFase(questId, faseNum) {
+  const dados = getDadosQuestao(questId);
+
+  // Parar cronômetro se já estiver ativo
+  if (cronoAtivo.questId === questId && cronoAtivo.faseNum === faseNum) {
+    const decorridoMs = Date.now() - cronoAtivo.inicioTimestamp;
+    const s = Math.max(1, Math.round(decorridoMs / 1000));
+    pararCronometro();
+
+    dados[`fase${faseNum}_t`] = s;
+    dados.tempoTotal = (dados.fase1_t || 0) + (dados.fase2_t || 0) + (dados.fase3_t || 0);
+
+    if (faseNum === 3 || (dados.fase1_t && dados.fase2_t && dados.fase3_t)) {
+      dados.concluida = true;
+    }
+
+    salvarStorage();
+    renderizarTudo();
+    return;
+  }
+
+  // Se outro estiver ativo, pede confirmação
+  if (cronoAtivo.questId !== null) {
+    if (!confirm("Há outro cronômetro em andamento. Deseja encerrá-lo e iniciar este?")) {
+      return;
+    }
+    pararCronometro();
+  }
+
+  cronoAtivo.questId = questId;
+  cronoAtivo.faseNum = faseNum;
+  cronoAtivo.inicioTimestamp = Date.now();
+
+  const elBtn = document.getElementById(`btn-fase-${questId}-${faseNum}`);
+  if (elBtn) {
+    elBtn.classList.add('btn-gravando');
+    elBtn.textContent = '⏹️ Parar e Gravar';
+  }
+
+  timerInterval = setInterval(() => {
+    const seg = Math.floor((Date.now() - cronoAtivo.inicioTimestamp) / 1000);
+    const elRelogio = document.getElementById(`tempo-fase-${questId}-${faseNum}`);
+    if (elRelogio) elRelogio.textContent = `${seg}s`;
+  }, 500);
+}
+window.acaoFase = acaoFase;
+
+function pararCronometro() {
+  if (timerInterval) {
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
+  cronoAtivo.questId = null;
+  cronoAtivo.faseNum = null;
+  cronoAtivo.inicioTimestamp = null;
+}
+
+// Alternar Dica individual dentro de cada fase
+function alternarDicaFase(questId, faseNum) {
+  const boxDica = document.getElementById(`dica-fase-${questId}-${faseNum}`);
+  if (boxDica) {
+    boxDica.classList.toggle('oculto');
+    const dados = getDadosQuestao(questId);
+    dados.dicasUsadas = Math.max(dados.dicasUsadas || 0, faseNum);
+    salvarStorage();
+  }
+}
+window.alternarDicaFase = alternarDicaFase;
+
+// ===== RENDERIZAÇÃO GERAL =====
+function renderizarTudo() {
+  atualizarBarraTopo();
+  renderizarQuadroEquacoes();
+  renderizarMuralMedalhas();
+  renderizarAbaAtual();
+}
+
+// 1. Barra Superior de Progresso e Ocultação
+function atualizarBarraTopo() {
+  const barra = document.getElementById('barra-topo-principal');
+  const btnReabrir = document.getElementById('btn-reabrir-topo');
+  const pctMini = document.getElementById('reabrir-pct-mini');
+
+  const nome = ESTADO.nomeAluno.trim();
+  const rotuloNome = document.getElementById('rotulo-nome-topo');
+  const tagAcordo = document.getElementById('status-acordo-tag');
+  const inputNome = document.getElementById('input-nome-aluno-topo');
+  const chkAcordo = document.getElementById('chk-acordo-topo');
+  const txtPct = document.getElementById('texto-percentual-geral');
+  const txtFracao = document.getElementById('texto-fracao-geral');
+  const barraFill = document.getElementById('barra-progresso-fill');
+  const statusGeral = document.getElementById('status-geral');
+  const btnAbaProva = document.getElementById('btn-aba-prova');
+
+  if (rotuloNome) rotuloNome.textContent = nome.length > 0 ? nome : "Estudante";
+  if (inputNome && document.activeElement !== inputNome) inputNome.value = nome;
+  if (chkAcordo) chkAcordo.checked = Boolean(ESTADO.acordoAceito);
+
+  if (tagAcordo) {
+    if (ESTADO.acordoAceito && nome.length > 0) {
+      tagAcordo.className = "badge-acordo assinado";
+      tagAcordo.textContent = "✓ Termo Assinado";
+    } else {
+      tagAcordo.className = "badge-acordo";
+      tagAcordo.textContent = "⚠️ Termo Pendente";
+    }
+  }
+
+  // Cálculo percentual geral (30 questões)
+  const totalFeitas = contarQuestoesConcluidas();
+  const pct = Math.round((totalFeitas / 30) * 100);
+  const kitsCompletos = getQuantidadeKitsConcluidos();
+
+  if (txtPct) txtPct.textContent = `${pct}%`;
+  if (pctMini) pctMini.textContent = `${pct}%`;
+  if (txtFracao) txtFracao.textContent = `(${totalFeitas}/30 questões)`;
+  if (barraFill) barraFill.style.width = `${pct}%`;
+  if (statusGeral) statusGeral.textContent = `${kitsCompletos} de 6 Kits Concluídos`;
+
+  // Status de Visibilidade da Barra
+  if (barra && btnReabrir) {
+    if (ESTADO.barraRecolhida) {
+      barra.classList.add('oculto');
+      btnReabrir.classList.remove('oculto');
+    } else {
+      barra.classList.remove('oculto');
+      btnReabrir.classList.add('oculto');
+    }
+  }
+
+  // Liberação da Aba de Prova (requer 6 kits)
+  const provaLiberada = (kitsCompletos === 6) || ESTADO.modoProfessor;
+  if (btnAbaProva) {
+    if (provaLiberada) {
+      btnAbaProva.classList.remove('bloqueada');
+      btnAbaProva.textContent = ESTADO.modoProfessor ? "🎯 PROVA" : "🎯 SIMULADO";
+      btnAbaProva.title = "Simulado liberado! Clique para iniciar.";
+    } else {
+      btnAbaProva.classList.add('bloqueada');
+      btnAbaProva.textContent = `🔒 SIMULADO (${kitsCompletos}/6 Kits)`;
+      btnAbaProva.title = "Conclua os 6 kits de treinamento para destravar o simulado.";
+    }
+  }
+}
+
+// 2. Mural de Emblemas (com ícone SVG permanente na madeira)
+function renderizarMuralMedalhas() {
+  const container = document.getElementById('grade-medalhas');
+  if (!container) return;
+
+  const kitsConcluidos = getQuantidadeKitsConcluidos();
+  container.innerHTML = '';
+
+  EMBLEMAS.forEach(emb => {
+    const conquistada = kitsConcluidos >= emb.kitsNecessarios;
+    const card = document.createElement('div');
+    card.className = `card-medalha ${conquistada ? 'conquistada' : ''}`;
+    card.innerHTML = `
+      <span class="icone-medalha">${emb.icone}</span>
+      <div class="nome-medalha">${emb.nome}</div>
+      <div class="meta-medalha">${emb.kitsNecessarios} ${emb.kitsNecessarios === 1 ? 'Kit concluído' : 'Kits concluídos'}</div>
+    `;
+    card.title = conquistada ? `Conquistado! ${emb.mensagem}` : `Bloqueado. Conclua quaisquer ${emb.kitsNecessarios} kits para destravar.`;
+    container.appendChild(card);
+  });
+}
+
+// 3. Quadro de Equações
+function renderizarQuadroEquacoes() {
+  const painel = document.getElementById('painel-equacoes');
+  const painelOverlay = document.getElementById('painel-equacoes-overlay');
+  if (!painel) return;
+
+  const htmlFormulas = DATABASE_EQUACOES.map(eq => `
+    <div class="card-formula">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <span class="tag-tipo">${eq.badge}</span>
+        <strong style="font-size: 1.05rem; color: var(--ink);">${eq.concept}</strong>
+      </div>
+      <div class="formula-render">$${eq.katex}$</div>
+      <div style="font-size:0.85rem; color:#495057;">${eq.desc}</div>
+    </div>
+  `).join('');
+
+  painel.innerHTML = htmlFormulas;
+  if (painelOverlay) painelOverlay.innerHTML = htmlFormulas;
+  garantirRenderizacaoLatex(painel);
+  if (painelOverlay) garantirRenderizacaoLatex(painelOverlay);
+}
+
+// 4. Renderização do Kit com DICAS INTEGRADAS DENTRO DE CADA FASE
+function renderizarAbaAtual() {
+  const kitId = ESTADO.kitAtivo;
+  const secKit = document.getElementById('conteudo-kit');
+  const secCert = document.getElementById('secao-certificado');
+  const secProva = document.getElementById('secao-prova');
+
+  document.querySelectorAll('.btn-aba').forEach(btn => {
+    btn.classList.toggle('ativa', String(btn.dataset.kit) === String(kitId));
+  });
+
+  if (kitId === 'cert') {
+    secKit.classList.add('oculto');
+    secCert.classList.remove('oculto');
+    secProva.classList.add('oculto');
+    renderizarPainelCertificado();
+    return;
+  }
+
+  if (kitId === 'prova') {
+    secKit.classList.add('oculto');
+    secCert.classList.add('oculto');
+    secProva.classList.remove('oculto');
+    renderizarPainelProvaSimulado();
+    return;
+  }
+
+  // Kits 1 a 6
+  secKit.classList.remove('oculto');
+  secCert.classList.add('oculto');
+  secProva.classList.add('oculto');
+
+  const kitNum = parseInt(kitId, 10);
+  const questoes = BANCO_KITS[kitNum] || [];
+  const kitFinalizado = isKitConcluido(kitNum);
+
+  let html = `
+    <div class="topo-kit-ativo">
+      <div>
+        <h2 class="titulo-kit">Caderno de Exercícios &bull; Kit ${kitNum}</h2>
+        <span style="font-size: 1.1rem; color: #495057;">
+          ${questoes.filter(q => isQuestaoConcluida(q.id)).length} de 5 questões concluídas
+        </span>
+      </div>
+      <button type="button" class="btn-reset-kit" onclick="resetarKitEspecifico(${kitNum})">
+        🔄 Zerar este Kit ${kitNum}
+      </button>
+    </div>
+  `;
+
+  questoes.forEach((q, idx) => {
+    const dados = getDadosQuestao(q.id);
+    const concluida = dados.concluida;
+
+    html += `
+      <article class="questao-card" id="card-${q.id}">
+        <div class="card-cabecalho">
+          <span class="num-q">${idx + 1}</span>
+          <span class="tag-nivel ${q.tipo}">${q.nivelTexto}</span>
+          <span style="font-family:'Fira Code', monospace; color:#868e96; font-size:0.95rem;">ID: ${q.id}</span>
+          ${concluida ? '<span style="color:var(--green); font-weight:bold; margin-left:auto;">✓ Concluída</span>' : ''}
+        </div>
+        
+        <div class="enunciado" style="font-size: 1.25rem; margin: 14px 0;">${q.enunciado}</div>
+
+        <!-- Grade das 3 Fases com Dica Associada a Cada Uma -->
+        <div class="fases-grade">
+          
+          <!-- Fase 1 -->
+          <div class="bloco-fase ${dados.fase1_t ? 'concluida' : ''}">
+            <div class="titulo-fase">
+              <span>I. Dados Isolados</span>
+              <span class="cronometro-fase" id="tempo-fase-${q.id}-1">${dados.fase1_t ? `${dados.fase1_t}s` : '--'}</span>
+            </div>
+            <button type="button" id="btn-fase-${q.id}-1" class="btn-acao ${dados.fase1_t ? 'concluido' : ''}" onclick="acaoFase('${q.id}', 1)">
+              ${dados.fase1_t ? `✓ Feito (${dados.fase1_t}s)` : '▶️ Iniciar Fase 1'}
+            </button>
+            <button type="button" class="btn-dica-fase" onclick="alternarDicaFase('${q.id}', 1)">
+              💡 Dica da Fase 1 (Dados)
+            </button>
+            <div id="dica-fase-${q.id}-1" class="caixa-dica-fase oculto">
+              ${q.dica1}
+            </div>
+          </div>
+
+          <!-- Fase 2 -->
+          <div class="bloco-fase ${dados.fase2_t ? 'concluida' : ''}">
+            <div class="titulo-fase">
+              <span>II. Equação</span>
+              <span class="cronometro-fase" id="tempo-fase-${q.id}-2">${dados.fase2_t ? `${dados.fase2_t}s` : '--'}</span>
+            </div>
+            <button type="button" id="btn-fase-${q.id}-2" class="btn-acao ${dados.fase2_t ? 'concluido' : ''}" onclick="acaoFase('${q.id}', 2)">
+              ${dados.fase2_t ? `✓ Feito (${dados.fase2_t}s)` : '▶️ Iniciar Fase 2'}
+            </button>
+            <button type="button" class="btn-dica-fase" onclick="alternarDicaFase('${q.id}', 2)">
+              💡 Dica da Fase 2 (Equação)
+            </button>
+            <div id="dica-fase-${q.id}-2" class="caixa-dica-fase oculto">
+              ${q.dica2}
+            </div>
+          </div>
+
+          <!-- Fase 3 -->
+          <div class="bloco-fase ${dados.fase3_t ? 'concluida' : ''}">
+            <div class="titulo-fase">
+              <span>III. Resolução</span>
+              <span class="cronometro-fase" id="tempo-fase-${q.id}-3">${dados.fase3_t ? `${dados.fase3_t}s` : '--'}</span>
+            </div>
+            <button type="button" id="btn-fase-${q.id}-3" class="btn-acao ${dados.fase3_t ? 'concluido' : ''}" onclick="acaoFase('${q.id}', 3)">
+              ${dados.fase3_t ? `✓ Feito (${dados.fase3_t}s)` : '▶️ Iniciar Fase 3'}
+            </button>
+            <button type="button" class="btn-dica-fase" onclick="alternarDicaFase('${q.id}', 3)">
+              💡 Dica da Fase 3 (Cálculo)
+            </button>
+            <div id="dica-fase-${q.id}-3" class="caixa-dica-fase oculto">
+              ${q.dica3}
+            </div>
+          </div>
+
+        </div>
+      </article>
+    `;
+  });
+
+  // Gabarito do Kit (apenas quando 5 questões estiverem concluídas)
+  if (kitFinalizado) {
+    html += `
+      <section class="box-gabarito-kit">
+        <h3 style="color: var(--green); font-size: 1.8rem; margin-top: 0;">🎉 Gabarito Didático Completo &bull; Kit ${kitNum}</h3>
+        <p>Parabéns! Todas as 5 questões deste kit foram concluídas. Confira a resolução oficial:</p>
+        <div class="lista-resolucoes">
+    `;
+
+    questoes.forEach((q, i) => {
+      html += `
+        <div style="border-top: 1px dashed #ced4da; padding: 12px 0;">
+          <h4 style="margin: 0 0 6px 0; font-size: 1.35rem;">Questão ${i + 1} (${q.id}):</h4>
+          <div style="margin-left: 10px; font-size: 1.1rem;">
+            <div><strong>I. Dados:</strong> ${q.gabarito.fase1.join(' &bull; ')}</div>
+            <div><strong>II. Equação:</strong> ${q.gabarito.fase2}</div>
+            <div><strong>III. Resolução:</strong> ${q.gabarito.fase3.join(' ➔ ')}</div>
+          </div>
+        </div>
+      `;
+    });
+
+    html += `</div></section>`;
+  } else {
+    html += `
+      <div class="box-gabarito-bloqueado">
+        🔒 <strong>Gabarito do Kit ${kitNum} Bloqueado:</strong> Conclua as 5 questões deste kit para liberar as resoluções passo a passo.
+      </div>
+    `;
+  }
+
+  secKit.innerHTML = html;
+  garantirRenderizacaoLatex(secKit);
+}
+
+// 5. Painel de Certificado
+function renderizarPainelCertificado() {
+  const statusGrid = document.getElementById('grade-kits-status');
+  const diplomaNome = document.getElementById('diploma-nome-exibicao');
+  const dataCert = document.getElementById('data-cert');
+  const diplomaMedalhas = document.getElementById('medalhas-diploma');
+  const diplomaResumo = document.getElementById('resumo-diploma');
+
+  const nome = ESTADO.nomeAluno.trim();
+  if (diplomaNome) diplomaNome.textContent = nome.length > 0 ? nome : "Estudante";
+  if (dataCert) dataCert.textContent = new Date().toLocaleDateString('pt-BR');
+
+  if (statusGrid) {
+    statusGrid.innerHTML = '';
+    for (let k = 1; k <= 6; k++) {
+      const conc = isKitConcluido(k);
+      const qtdFeitas = BANCO_KITS[k].filter(q => isQuestaoConcluida(q.id)).length;
+      const card = document.createElement('div');
+      card.className = `card-kit-metrica ${conc ? 'concluido' : ''}`;
+      card.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <strong style="font-size: 1.3rem;">Kit ${k}</strong>
+          <span>${conc ? '✅ Concluído' : `${qtdFeitas}/5 Feitas`}</span>
+        </div>
+        <p style="font-size:0.95rem; margin:8px 0; color:#495057;">
+          ${conc ? 'Gabarito liberado e domínio consolidado.' : 'Resolva as 5 questões para destravar o gabarito.'}
+        </p>
+        <button type="button" class="btn-acao pequeno" onclick="mudarAba(${k})">Abrir Kit ${k}</button>
+      `;
+      statusGrid.appendChild(card);
+    }
+  }
+
+  const kitsConcluidos = getQuantidadeKitsConcluidos();
+  if (diplomaResumo) {
+    diplomaResumo.innerHTML = `
+      <div style="font-size: 1.3rem; margin: 12px 0;">
+        <strong>Kits Concluídos:</strong> ${kitsConcluidos} de 6 &bull; 
+        <strong>Questões Finalizadas:</strong> ${contarQuestoesConcluidas()} de 30
+      </div>
+    `;
+  }
+
+  if (diplomaMedalhas) {
+    const iconesGanhos = EMBLEMAS.filter(e => kitsConcluidos >= e.kitsNecessarios)
+      .map(e => `<span style="margin: 0 4px;">${e.icone}</span>`).join('');
+    diplomaMedalhas.innerHTML = `<div style="font-size: 2.2rem; display: flex; justify-content: center; align-items: center; gap: 8px;">${iconesGanhos || '🌱'}</div>`;
+  }
+}
+
+// ===== SEÇÃO DE PROVA / SIMULADO =====
+let timerAvaliacao = null;
+
+function renderizarPainelProvaSimulado() {
+  const pBloqueio = document.getElementById('painel-bloqueio-prova');
+  const pPre = document.getElementById('painel-pre-prova');
+  const pExec = document.getElementById('painel-execucao-prova');
+  const pFim = document.getElementById('painel-fim-prova');
+
+  const kitsConcluidos = getQuantidadeKitsConcluidos();
+  const liberada = (kitsConcluidos === 6) || ESTADO.modoProfessor;
+
+  if (!liberada) {
+    pBloqueio.classList.remove('oculto');
+    pPre.classList.add('oculto');
+    pExec.classList.add('oculto');
+    pFim.classList.add('oculto');
+    document.getElementById('qtd-kits-concluidos-aviso').textContent = `${kitsConcluidos}`;
+    return;
+  }
+
+  pBloqueio.classList.add('oculto');
+  const av = ESTADO.avaliacao;
+
+  if (av.etapaAtual === 'fim') {
+    pPre.classList.add('oculto');
+    pExec.classList.add('oculto');
+    pFim.classList.remove('oculto');
+    exibirFimDeProva();
+  } else if (av.etapaAtual === 'pre_prova' || !av.etapaAtual) {
+    pPre.classList.remove('oculto');
+    pExec.classList.add('oculto');
+    pFim.classList.add('oculto');
+  } else {
+    pPre.classList.add('oculto');
+    pExec.classList.remove('oculto');
+    pFim.classList.add('oculto');
+    iniciarTemporizadorAvaliacao();
+  }
+}
+
+function executarSorteioAvaliacao() {
+  const boxRelogio = document.getElementById('animacao-relogio');
+  const btnIniciar = document.getElementById('btn-iniciar-avaliacao-oficial');
+
+  btnIniciar.disabled = true;
+  boxRelogio.classList.remove('oculto');
+
+  setTimeout(() => {
+    const qFacil = TODAS_FACEIS[Math.floor(Math.random() * TODAS_FACEIS.length)];
+    const qMedia = TODAS_MEDIAS[Math.floor(Math.random() * TODAS_MEDIAS.length)];
+    const qDificil = TODAS_DIFICEIS[Math.floor(Math.random() * TODAS_DIFICEIS.length)];
+    const semente = Math.floor(100 + Math.random() * 900);
+
+    ESTADO.avaliacao.semente = semente;
+    ESTADO.avaliacao.questoesIds = [qFacil.id, qMedia.id, qDificil.id];
+    ESTADO.avaliacao.etapaAtual = 'facil';
+    ESTADO.avaliacao.tempoRestante = TEMPOS_AVALIACAO.facil;
+    ESTADO.avaliacao.tempoTotalGasto = 0;
+    salvarStorage();
+
+    btnIniciar.disabled = false;
+    boxRelogio.classList.add('oculto');
+    renderizarPainelProvaSimulado();
+  }, 1000);
+}
+
+function iniciarTemporizadorAvaliacao() {
+  if (timerAvaliacao) clearInterval(timerAvaliacao);
+
+  const av = ESTADO.avaliacao;
+  atualizarInterfaceAvaliacao();
+
+  timerAvaliacao = setInterval(() => {
+    if (av.tempoRestante > 0) {
+      av.tempoRestante--;
+      av.tempoTotalGasto++;
+      atualizarVisorTempoAvaliacao(TEMPOS_AVALIACAO[av.etapaAtual] || 0);
+    } else {
+      avancarProximaEtapaAvaliacao();
+    }
+  }, 1000);
+}
+
+function avancarProximaEtapaAvaliacao() {
+  const av = ESTADO.avaliacao;
+  if (av.etapaAtual === 'facil') {
+    alert("Tempo da Questão Fácil encerrado! Avançando para a Questão Média.");
+    av.etapaAtual = 'medio';
+    av.tempoRestante = TEMPOS_AVALIACAO.medio;
+  } else if (av.etapaAtual === 'medio') {
+    alert("Tempo da Questão Média encerrado! Avançando para a Questão Difícil.");
+    av.etapaAtual = 'dificil';
+    av.tempoRestante = TEMPOS_AVALIACAO.dificil;
+  } else if (av.etapaAtual === 'dificil') {
+    alert("Tempo da Questão Difícil encerrado! Entrando na Revisão Geral (3 questões visíveis).");
+    av.etapaAtual = 'revisao';
+    av.tempoRestante = TEMPOS_AVALIACAO.revisao;
+  } else if (av.etapaAtual === 'revisao') {
+    finalizarAvaliacaoDefinitiva();
+    return;
+  }
+
+  salvarStorage();
+  iniciarTemporizadorAvaliacao();
+}
+
+function adicionarTempoExtra(minutos) {
+  const av = ESTADO.avaliacao;
+  av.tempoRestante += minutos * 60;
+  salvarStorage();
+  atualizarVisorTempoAvaliacao(TEMPOS_AVALIACAO[av.etapaAtual] || 0);
+  alert(`⏱️ +${minutos} minutos adicionados!`);
+}
+window.adicionarTempoExtra = adicionarTempoExtra;
+
+function finalizarAvaliacaoDefinitiva() {
+  if (timerAvaliacao) {
+    clearInterval(timerAvaliacao);
+    timerAvaliacao = null;
+  }
+  ESTADO.avaliacao.etapaAtual = 'fim';
+  salvarStorage();
+  renderizarPainelProvaSimulado();
+}
+
+function atualizarInterfaceAvaliacao() {
+  const av = ESTADO.avaliacao;
+  const tagSemente = document.getElementById('tag-semente-prova');
+  const tagAluno = document.getElementById('tag-aluno-prova');
+  const bannerEtapa = document.getElementById('banner-fase-etapa');
+  const container = document.getElementById('container-questao-ativa');
+  const painelExtra = document.getElementById('controles-tempo-extra');
+
+  if (tagSemente) tagSemente.textContent = `Sorteio #${av.semente || '001'}`;
+  if (tagAluno) tagAluno.textContent = `Aluno: ${ESTADO.nomeAluno.trim() || 'Estudante'}`;
+
+  const questoes = (av.questoesIds || []).map(id => obterQuestaoPorId(id)).filter(Boolean);
+  container.innerHTML = '';
+
+  if (av.etapaAtual === 'facil') {
+    bannerEtapa.innerHTML = "🟢 <strong>ETAPA 1 DE 3 — QUESTÃO FÁCIL</strong> (Foco Exclusivo &bull; 8 minutos)";
+    painelExtra.classList.add('oculto');
+    renderizarQuestaoCardSimulado(questoes[0], container, 1, "Fácil (8 min)");
+  } else if (av.etapaAtual === 'medio') {
+    bannerEtapa.innerHTML = "🟡 <strong>ETAPA 2 DE 3 — QUESTÃO MÉDIA</strong> (Foco Exclusivo &bull; 10 minutos)";
+    painelExtra.classList.add('oculto');
+    renderizarQuestaoCardSimulado(questoes[1], container, 2, "Média (10 min)");
+  } else if (av.etapaAtual === 'dificil') {
+    bannerEtapa.innerHTML = "🔴 <strong>ETAPA 3 DE 3 — QUESTÃO DIFÍCIL</strong> (Foco Exclusivo &bull; 12 minutos)";
+    painelExtra.classList.add('oculto');
+    renderizarQuestaoCardSimulado(questoes[2], container, 3, "Difícil (12 min)");
+  } else if (av.etapaAtual === 'revisao') {
+    bannerEtapa.innerHTML = "🟣 <strong>ETAPA 4 — REVISÃO GERAL</strong> (Todas as 3 questões visíveis &bull; 15 minutos)";
+    painelExtra.classList.remove('oculto');
+    const rotulos = ["Fácil", "Média", "Difícil"];
+    questoes.forEach((q, idx) => {
+      renderizarQuestaoCardSimulado(q, container, idx + 1, rotulos[idx]);
+    });
+  }
+
+  garantirRenderizacaoLatex(container);
+}
+
+function renderizarQuestaoCardSimulado(q, container, num, label) {
+  if (!q) return;
+  const card = document.createElement('article');
+  card.className = "questao-card";
+  card.innerHTML = `
+    <div class="card-cabecalho">
+      <span class="num-q">${num}</span>
+      <span class="tag-nivel ${q.tipo}">${label}</span>
+      <span style="font-family:'Fira Code', monospace; color:#868e96; font-size:0.95rem;">ID: ${q.id}</span>
+    </div>
+    <div class="enunciado" style="font-size: 1.35rem; margin: 16px 0;">${q.enunciado}</div>
+    <div class="postit">
+      ✍️ <strong>Resolução no Caderno:</strong> Estruture: <strong>I. Dados</strong> &bull; <strong>II. Equação</strong> &bull; <strong>III. Resolução</strong>.
+    </div>
+  `;
+  container.appendChild(card);
+}
+
+function atualizarVisorTempoAvaliacao(maxSegundos) {
+  const av = ESTADO.avaliacao;
+  const visor = document.getElementById('visor-grande-tempo');
+  const barra = document.getElementById('barra-tempo-preenchimento');
+
+  const m = Math.floor(av.tempoRestante / 60);
+  const s = av.tempoRestante % 60;
+  if (visor) visor.textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+
+  if (barra && maxSegundos > 0) {
+    const pct = Math.max(0, (av.tempoRestante / maxSegundos) * 100);
+    barra.style.width = `${pct}%`;
+  }
+}
+
+function exibirFimDeProva() {
+  const folhaNome = document.getElementById('folha-nome-aluno');
+  const folhaData = document.getElementById('folha-data');
+  const btnNovo = document.getElementById('btn-novo-simulado');
+  const btnGab = document.getElementById('btn-ver-gabarito-simulado');
+  const boxGab = document.getElementById('gabarito-pos-prova');
+
+  if (folhaNome) folhaNome.textContent = ESTADO.nomeAluno.trim() || 'Estudante';
+  if (folhaData) folhaData.textContent = new Date().toLocaleDateString('pt-BR');
+
+  if (btnNovo) {
+    btnNovo.onclick = () => {
+      ESTADO.avaliacao.etapaAtual = 'pre_prova';
+      salvarStorage();
+      renderizarPainelProvaSimulado();
+    };
+  }
+
+  if (btnGab) {
+    btnGab.onclick = () => {
+      if (!boxGab) return;
+      boxGab.classList.toggle('oculto');
+      const questoes = (ESTADO.avaliacao.questoesIds || []).map(id => obterQuestaoPorId(id)).filter(Boolean);
+      boxGab.innerHTML = `
+        <h3>📖 Resolução Comentada do Simulado</h3>
+        ${questoes.map((q, i) => `
+          <div style="border-top:1px dashed #ced4da; padding:12px 0;">
+            <h4>Questão ${i + 1} (${q.id}) - ${q.nivelTexto}</h4>
+            <div><strong>I. Dados:</strong> ${q.gabarito.fase1.join(' &bull; ')}</div>
+            <div><strong>II. Equação:</strong> ${q.gabarito.fase2}</div>
+            <div><strong>III. Resolução:</strong> ${q.gabarito.fase3.join(' ➔ ')}</div>
+          </div>
+        `).join('')}
+      `;
+      garantirRenderizacaoLatex(boxGab);
+    };
+  }
+}
+
+// ===== NAVEGAÇÃO DE ABAS =====
+function mudarAba(kit) {
+  ESTADO.kitAtivo = kit;
+  salvarStorage();
+  renderizarTudo();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+window.mudarAba = mudarAba;
+
+// ===== INICIALIZAÇÃO DO DOM =====
+document.addEventListener('DOMContentLoaded', () => {
+  carregarStorage();
+
+  // 1. Controle da Barra Superior e Edição de Nome
+  const btnEditarNome = document.getElementById('btn-editar-nome-topo');
+  const gavetaPerfil = document.getElementById('gaveta-perfil');
+  const inputNome = document.getElementById('input-nome-aluno-topo');
+  const chkAcordo = document.getElementById('chk-acordo-topo');
+  const btnSalvarPerfil = document.getElementById('btn-salvar-perfil');
+  const btnOcultarTopo = document.getElementById('btn-ocultar-barra-topo');
+  const btnReabrirTopo = document.getElementById('btn-reabrir-topo');
+
+  // Abre gaveta e foca o cursor no input ao clicar em "Editar Nome"
+  if (btnEditarNome && gavetaPerfil) {
+    btnEditarNome.addEventListener('click', () => {
+      gavetaPerfil.classList.toggle('oculto');
+      if (!gavetaPerfil.classList.contains('oculto') && inputNome) {
+        inputNome.focus();
+        inputNome.select();
+      }
+    });
+  }
+
+  function salvarIdentificacao() {
+    if (inputNome) ESTADO.nomeAluno = inputNome.value.trim();
+    if (chkAcordo) ESTADO.acordoAceito = chkAcordo.checked;
+    salvarStorage();
+    atualizarBarraTopo();
+  }
+
+  if (inputNome) inputNome.addEventListener('input', salvarIdentificacao);
+  if (chkAcordo) chkAcordo.addEventListener('change', salvarIdentificacao);
+
+  if (btnSalvarPerfil) {
+    btnSalvarPerfil.addEventListener('click', () => {
+      salvarIdentificacao();
+      if (gavetaPerfil) gavetaPerfil.classList.add('oculto');
+      alert("✓ Identificação gravada!");
+    });
+  }
+
+  // Ocultar / Reabrir Barra Superior
+  if (btnOcultarTopo) {
+    btnOcultarTopo.addEventListener('click', () => {
+      ESTADO.barraRecolhida = true;
+      salvarStorage();
+      atualizarBarraTopo();
+    });
+  }
+  if (btnReabrirTopo) {
+    btnReabrirTopo.addEventListener('click', () => {
+      ESTADO.barraRecolhida = false;
+      salvarStorage();
+      atualizarBarraTopo();
+    });
+  }
+
+  // 2. Navegação entre Abas
+  document.querySelectorAll('.btn-aba').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const kit = btn.dataset.kit;
+      if (kit === 'prova' && btn.classList.contains('bloqueada')) {
+        alert("🔒 O Simulado Oficial requer a conclusão dos 6 kits (30 questões). Continue treinando!");
+        return;
+      }
+      mudarAba(kit);
+    });
+  });
+
+  // 3. Quadro de Equações Sanfonado
+  const gatilhoForm = document.getElementById('gatilho-formulas');
+  const painelForm = document.getElementById('painel-equacoes');
+  const setaForm = document.getElementById('seta-form');
+  if (gatilhoForm && painelForm) {
+    gatilhoForm.addEventListener('click', () => {
+      painelForm.classList.toggle('oculto');
+      if (setaForm) setaForm.textContent = painelForm.classList.contains('oculto') ? '▶' : '▼';
+    });
+  }
+
+  // 4. Modal de Equações Flutuante (Funciona em qualquer aba)
+  const btnFlutuante = document.getElementById('btn-flutuante-equacoes');
+  const overlayEq = document.getElementById('overlay-equacoes');
+  const btnFecharEq = document.getElementById('btn-fechar-equacoes');
+  if (btnFlutuante && overlayEq) {
+    btnFlutuante.addEventListener('click', () => overlayEq.classList.remove('oculto'));
+  }
+  if (btnFecharEq && overlayEq) {
+    btnFecharEq.addEventListener('click', () => overlayEq.classList.add('oculto'));
+  }
+
+  // 5. Botões do Simulado
+  const btnSortear = document.getElementById('btn-iniciar-avaliacao-oficial');
+  if (btnSortear) btnSortear.addEventListener('click', executarSorteioAvaliacao);
+
+  const btnEncerrarAntecipado = document.getElementById('btn-encerrar-antecipado');
+  if (btnEncerrarAntecipado) {
+    btnEncerrarAntecipado.addEventListener('click', () => {
+      if (confirm("Deseja realmente entregar e finalizar a avaliação agora?")) {
+        finalizarAvaliacaoDefinitiva();
+      }
+    });
+  }
+
+  // 6. Acesso Professor (Senha FÍSICA com acento rigorosamente tratada)
+  const btnProf = document.getElementById('btn-professor');
+  if (btnProf) {
+    btnProf.addEventListener('click', () => {
+      const pass = prompt("Digite a senha do Professor:");
+      if (pass) {
+        const passNorm = pass.trim().normalize("NFC").toUpperCase();
+        if (passNorm === "FÍSICA" || passNorm === "FISICA") {
+          ESTADO.modoProfessor = !ESTADO.modoProfessor;
+          salvarStorage();
+          renderizarTudo();
+          alert(ESTADO.modoProfessor ? "Modo Professor ATIVADO (Simulado desbloqueado)." : "Modo Aluno ATIVADO.");
+        } else {
+          alert("Senha incorreta.");
+        }
+      }
+    });
+  }
+
+  // Render inicial completo
+  renderizarTudo();
+});
