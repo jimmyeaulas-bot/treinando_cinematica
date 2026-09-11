@@ -1,15 +1,21 @@
 // =========================================================================
-// CADERNO DE CINEMÁTICA – PROF. ANDRÉ (ARQUITETURA REVISADA & INTEGRADA)
+// CADERNO DE CINEMÁTICA – PROF. ANDRÉ (V8 – VERSÃO CONSOLIDADA FINAL)
+// =========================================================================
+// • Migração automática V7/V5 → V8
+// • Equações corrigidas (6 fórmulas, \frac)
+// • Cronômetro digital oculto (só barra verde)
+// • Cores de fundo por dificuldade
+// • Sistema de zoom auto-ocultável
+// • Sorteio com preview e seed reprodutível (864 combinações)
+// • NTP obrigatório (modo sala)
+// • Horários de aula com penalidades proporcionais
+// • Fechamento automático 3 min antes do sinal
+// • Modos Simulado × Sala de Aula
+// • Transições sem alert()
 // =========================================================================
 
-// Ícone vetorial SVG exclusivo para a Medalha de Madeira (nunca quebra em nenhum SO)
-const SVG_MEDALHA_MADEIRA = `
-  <svg viewBox="0 0 36 36" width="38" height="38" style="display:inline-block; vertical-align:middle;">
-    <circle cx="18" cy="18" r="16" fill="#8B5A2B" stroke="#5C3A21" stroke-width="2"/>
-    <circle cx="18" cy="18" r="12" fill="#A0522D" stroke="#D2B48C" stroke-width="1.5" stroke-dasharray="3,2"/>
-    <path d="M12 18h12M14 14h8M14 22h8" stroke="#F5DEB3" stroke-width="2" stroke-linecap="round"/>
-  </svg>
-`;
+// ===== 1. ÍCONE SVG DA MEDALHA DE MADEIRA =====
+const SVG_MEDALHA_MADEIRA = `<svg viewBox="0 0 36 36" width="38" height="38" style="display:inline-block; vertical-align:middle;"><circle cx="18" cy="18" r="16" fill="#8B5A2B" stroke="#5C3A21" stroke-width="2"/><circle cx="18" cy="18" r="12" fill="#A0522D" stroke="#D2B48C" stroke-width="1.5" stroke-dasharray="3,2"/><path d="M12 18h12M14 14h8M14 22h8" stroke="#F5DEB3" stroke-width="2" stroke-linecap="round"/></svg>`;
 
 const EMBLEMAS = [
   { id: 1, nome: "Medalha de Madeira", icone: SVG_MEDALHA_MADEIRA, kitsNecessarios: 1, mensagem: "Primeiro kit finalizado! As sinapses de decodificação de variáveis estão ativas." },
@@ -20,16 +26,17 @@ const EMBLEMAS = [
   { id: 6, nome: "Medalha de Diamante", icone: "💎", kitsNecessarios: 6, mensagem: "Maestria Suprema! Todos os 6 kits concluídos. Memória permanente assegurada!" }
 ];
 
+// ===== 2. EQUAÇÕES CORRIGIDAS (6 fórmulas com \frac) =====
 const DATABASE_EQUACOES = [
-  { badge: "MRU", concept: "Velocidade Média", katex: "v_m = \\cfrac{\\Delta S}{\\Delta t}", desc: "Variação de posição pelo tempo sem aceleração." },
+  { badge: "MRU", concept: "Velocidade Média", katex: "v_m = \\frac{\\Delta S}{\\Delta t}", desc: "Variação de posição pelo tempo sem aceleração." },
   { badge: "MRU", concept: "Posição (Sorvete)", katex: "S = S_0 + v \\cdot t", desc: "Localização final do móvel no MRU." },
-  { badge: "MRUV", concept: "Aceleração Escalar Média", katex: "a_m = \\cfrac{\\Delta v}{\\Delta t}", desc: "Taxa com que a velocidade é alterada." },
+  { badge: "MRUV", concept: "Aceleração Média", katex: "a_m = \\frac{\\Delta v}{\\Delta t}", desc: "Taxa com que a velocidade é alterada." },
   { badge: "MRUV", concept: "Velocidade (Vovô Ateu)", katex: "v = v_0 + a \\cdot t", desc: "Velocidade no instante t sob aceleração constante." },
-  { badge: "MRUV", concept: "Deslocamento (Sorvetão)", katex: "\\Delta S = v_0 \\cdot t + \\cfrac{1}{2} \\cdot a \\cdot t^2", desc: "Distância percorrida com aceleração conhecida." },
-  { badge: "MRUV", concept: "Equação de Torricelli", katex: "v^2 = v_0^2 + 2 \\cdot a \\cdot \\Delta S", desc: "Relação fundamental quando o tempo não é informado." },
-  { badge: "MRUV", concept: "Velocidade Média no MUV", katex: "v_m = \\cfrac{v_0 + v}{2}", desc: "Média aritmética das velocidades nos extremos." }
+  { badge: "MRUV", concept: "Posição (Sorvetão)", katex: "S = S_0 + v_0 \\cdot t + \\frac{1}{2} \\cdot a \\cdot t^2", desc: "Posição com aceleração conhecida." },
+  { badge: "MRUV", concept: "Torricelli (Sem tempo)", katex: "v^2 = v_0^2 + 2 \\cdot a \\cdot \\Delta S", desc: "Relação fundamental quando o tempo não é informado." }
 ];
 
+// ===== 3. TEMPOS DE AVALIAÇÃO (SIMULADO) =====
 const TEMPOS_AVALIACAO = {
   facil: 8 * 60,
   medio: 10 * 60,
@@ -37,7 +44,129 @@ const TEMPOS_AVALIACAO = {
   revisao: 15 * 60
 };
 
-// ===== KITS DE EXERCÍCIOS =====
+// ===== 4. HORÁRIOS DE AULA (MODO SALA) =====
+const HORARIOS_AULA = [
+  { periodo: 'Manhã', inicio: '07:00', fim: '07:50' },
+  { periodo: 'Manhã', inicio: '07:50', fim: '08:40' },
+  { periodo: 'Manhã', inicio: '08:40', fim: '09:30' },
+  { periodo: 'Manhã', inicio: '09:45', fim: '10:35' },
+  { periodo: 'Manhã', inicio: '10:35', fim: '11:25' },
+  { periodo: 'Manhã', inicio: '11:25', fim: '12:15' },
+  { periodo: 'Manhã', inicio: '12:15', fim: '13:05' },
+  { periodo: 'Tarde', inicio: '13:10', fim: '14:00' },
+  { periodo: 'Tarde', inicio: '14:00', fim: '14:50' },
+  { periodo: 'Tarde', inicio: '14:50', fim: '15:40' },
+  { periodo: 'Tarde', inicio: '15:55', fim: '16:45' },
+  { periodo: 'Tarde', inicio: '16:45', fim: '17:35' },
+  { periodo: 'Tarde', inicio: '17:35', fim: '18:25' },
+  { periodo: 'Noite', inicio: '18:30', fim: '19:15' },
+  { periodo: 'Noite', inicio: '19:15', fim: '20:00' },
+  { periodo: 'Noite', inicio: '20:15', fim: '21:00' },
+  { periodo: 'Noite', inicio: '21:00', fim: '21:45' },
+  { periodo: 'Noite', inicio: '21:45', fim: '22:30' }
+];
+
+const BUFFER_SINAL_SEG = 180; // 3 minutos antes do sinal
+const TOTAL_COMBINACOES = 864; // 12 fáceis × 12 médias × 6 difíceis
+
+// ===== 5. MIGRAÇÃO DE DADOS (V7/V5 → V8) =====
+const CHAVE_STORAGE = "CINEMATICA_TREINO_PROFA_V8";
+const CHAVES_ANTIGAS = [
+  "CINEMATICA_TREINO_PROFA_V7",
+  "CINEMATICA_TREINO_PROFA_V5"
+];
+
+function detectarEMigrarDados() {
+  const v8 = localStorage.getItem(CHAVE_STORAGE);
+  if (v8) {
+    try { return JSON.parse(v8); } catch (e) { console.warn("V8 corrompida."); }
+  }
+  for (const chave of CHAVES_ANTIGAS) {
+    const dadosSalvos = localStorage.getItem(chave);
+    if (dadosSalvos) {
+      try {
+        const antigo = JSON.parse(dadosSalvos);
+        const migrado = {
+          nomeAluno: antigo.nomeAluno || "",
+          acordoAceito: antigo.acordoAceito || false,
+          barraRecolhida: antigo.barraRecolhida || false,
+          kitAtivo: antigo.kitAtivo || 1,
+          respostas: antigo.respostas || {},
+          modoProfessor: antigo.modoProfessor || false,
+          historico: antigo.historico || [],
+          provaLiberada: antigo.provaLiberada || false,
+          provaQuestoes: antigo.provaQuestoes || [],
+          provaFinalizada: antigo.provaFinalizada || false,
+          provaTempo: antigo.provaTempo || 0,
+          zoomLevel: 1.5,
+          avaliacao: {
+            semente: null,
+            questoesIds: [],
+            etapaAtual: 'pre_prova',
+            tempoRestante: 0,
+            tempoTotalGasto: 0,
+            modoProva: 'simulado'
+          }
+        };
+        localStorage.setItem(CHAVE_STORAGE, JSON.stringify(migrado));
+        console.log(`✓ Dados migrados de ${chave} para V8`);
+        return migrado;
+      } catch (e) {
+        console.warn(`Erro ao migrar de ${chave}:`, e);
+      }
+    }
+  }
+  return null;
+}
+
+// ===== 6. ESTADO E PERSISTÊNCIA =====
+const ESTADO_PADRAO = {
+  nomeAluno: "",
+  acordoAceito: false,
+  barraRecolhida: false,
+  kitAtivo: 1,
+  respostas: {},
+  modoProfessor: false,
+  historico: [],
+  provaLiberada: false,
+  provaQuestoes: [],
+  provaFinalizada: false,
+  provaTempo: 0,
+  zoomLevel: 1.5,
+  avaliacao: {
+    semente: null,
+    questoesIds: [],
+    etapaAtual: 'pre_prova',
+    tempoRestante: 0,
+    tempoTotalGasto: 0,
+    modoProva: 'simulado'
+  }
+};
+
+let ESTADO = {};
+
+function carregarStorage() {
+  const migrado = detectarEMigrarDados();
+  if (migrado) {
+    ESTADO = { ...ESTADO_PADRAO, ...migrado };
+    if (!ESTADO.avaliacao) ESTADO.avaliacao = { ...ESTADO_PADRAO.avaliacao };
+    if (!ESTADO.avaliacao.modoProva) ESTADO.avaliacao.modoProva = 'simulado';
+    if (ESTADO.zoomLevel === undefined) ESTADO.zoomLevel = 1.5;
+  } else {
+    ESTADO = JSON.parse(JSON.stringify(ESTADO_PADRAO));
+  }
+  return ESTADO;
+}
+
+function salvarStorage() {
+  try {
+    localStorage.setItem(CHAVE_STORAGE, JSON.stringify(ESTADO));
+  } catch (e) {
+    console.error("Erro ao salvar LocalStorage:", e);
+  }
+}
+
+// ===== 7. BANCO DE KITS (IDÊNTICO À V7) =====
 const kit1 = [
   {
     id: "K1_Q1", tipo: "facil", nivelTexto: "Fácil (2F)",
@@ -106,24 +235,24 @@ const kit2 = [
     id: "K2_Q1", tipo: "facil", nivelTexto: "Fácil (2F)",
     enunciado: "Um corredor percorre uma pista retilínea a uma velocidade constante de $6\\text{ m/s}$. Sabendo que ele partiu da origem ($S_0 = 0$), quanto tempo ele levará para atingir a marca de $168\\text{ metros}$?",
     dica1: "Identifique: deslocamento $\\Delta S = 168\\text{ m}$ e velocidade constante $v = 6\\text{ m/s}$.",
-    dica2: "Isole o tempo na relação do MRU: $\\Delta t = \\cfrac{\\Delta S}{v}$.",
+    dica2: "Isole o tempo na relação do MRU: $\\Delta t = \\frac{\\Delta S}{v}$.",
     dica3: "Divida 168 por 6.",
     gabarito: {
       fase1: ["$S_0 = 0$", "$S = 168\\text{ m}$", "$v = 6\\text{ m/s}$"],
-      fase2: "Equação: $\\Delta t = \\cfrac{\\Delta S}{v}$",
-      fase3: ["$\\Delta t = \\cfrac{168}{6}$", "$\\mathbf{\\Delta t = 28\\text{ s}}$"]
+      fase2: "Equação: $\\Delta t = \\frac{\\Delta S}{v}$",
+      fase3: ["$\\Delta t = \\frac{168}{6}$", "$\\mathbf{\\Delta t = 28\\text{ s}}$"]
     }
   },
   {
     id: "K2_Q2", tipo: "facil", nivelTexto: "Fácil (2F)",
     enunciado: "Um móvel parte do repouso com aceleração constante de $6\\text{ m/s}^2$. Qual o deslocamento escalar realizado por esse corpo nos primeiros $4\\text{ segundos}$ de movimento?",
     dica1: "Dados: parte do repouso ($v_0 = 0$), aceleração $a = 6\\text{ m/s}^2$ e tempo $t = 4\\text{ s}$.",
-    dica2: "Aplique a função do deslocamento (Sorvetão): $\\Delta S = v_0 t + \\cfrac{1}{2} a t^2$.",
-    dica3: "Como $v_0 = 0$, calcule apenas $\\cfrac{1}{2} \\cdot 6 \\cdot 4^2 = 3 \\times 16$.",
+    dica2: "Aplique a função do deslocamento (Sorvetão): $\\Delta S = v_0 t + \\frac{1}{2} a t^2$.",
+    dica3: "Como $v_0 = 0$, calcule apenas $\\frac{1}{2} \\cdot 6 \\cdot 4^2 = 3 \\times 16$.",
     gabarito: {
       fase1: ["$v_0 = 0$", "$a = 6\\text{ m/s}^2$", "$t = 4\\text{ s}$"],
-      fase2: "Função: $\\Delta S = \\cfrac{1}{2} a t^2$",
-      fase3: ["$\\Delta S = \\cfrac{1}{2} \\cdot 6 \\cdot 16$", "$\\mathbf{\\Delta S = 48\\text{ m}}$"]
+      fase2: "Função: $\\Delta S = \\frac{1}{2} a t^2$",
+      fase3: ["$\\Delta S = \\frac{1}{2} \\cdot 6 \\cdot 16$", "$\\mathbf{\\Delta S = 48\\text{ m}}$"]
     }
   },
   {
@@ -169,12 +298,12 @@ const kit3 = [
     id: "K3_Q1", tipo: "facil", nivelTexto: "Fácil (2F)",
     enunciado: "Uma partícula tem sua velocidade alterada de $5\\text{ m/s}$ para $29\\text{ m/s}$ de forma constante em um período de $8\\text{ segundos}$. Determine a aceleração escalar média da partícula.",
     dica1: "Calcule a variação da velocidade: $\\Delta v = 29 - 5 = 24\\text{ m/s}$ e anote $\\Delta t = 8\\text{ s}$.",
-    dica2: "Definição de aceleração média: $a_m = \\cfrac{\\Delta v}{\\Delta t}$.",
+    dica2: "Definição de aceleração média: $a_m = \\frac{\\Delta v}{\\Delta t}$.",
     dica3: "Divida 24 por 8.",
     gabarito: {
       fase1: ["$v_0 = 5\\text{ m/s}$", "$v = 29\\text{ m/s}$", "$\\Delta t = 8\\text{ s}$"],
-      fase2: "Aceleração: $a_m = \\cfrac{\\Delta v}{\\Delta t}$",
-      fase3: ["$a_m = \\cfrac{24}{8}$", "$\\mathbf{a_m = 3\\text{ m/s}^2}$"]
+      fase2: "Aceleração: $a_m = \\frac{\\Delta v}{\\Delta t}$",
+      fase3: ["$a_m = \\frac{24}{8}$", "$\\mathbf{a_m = 3\\text{ m/s}^2}$"]
     }
   },
   {
@@ -186,19 +315,19 @@ const kit3 = [
     gabarito: {
       fase1: ["$S_0 = 15\\text{ m}$", "$S = 99\\text{ m}$", "$v = 7\\text{ m/s}$"],
       fase2: "Função Horária: $S = S_0 + v \\cdot t$",
-      fase3: ["$7t = 84 \\implies t = \\cfrac{84}{7}$", "$\\mathbf{t = 12\\text{ s}}$"]
+      fase3: ["$7t = 84 \\implies t = \\frac{84}{7}$", "$\\mathbf{t = 12\\text{ s}}$"]
     }
   },
   {
     id: "K3_Q3", tipo: "medio", nivelTexto: "Intermediário (2I)",
     enunciado: "Um trem acelera uniformemente saindo de uma estação com velocidade de $18\\text{ km/h}$ até atingir $90\\text{ km/h}$. Qual a velocidade média do trem durante essa aceleração, em m/s?",
     dica1: "Converta ambas para m/s dividindo por 3,6: $18 / 3{,}6 = 5\\text{ m/s}$ e $90 / 3{,}6 = 25\\text{ m/s}$.",
-    dica2: "No MUV, a velocidade média é a média aritmética dos extremos: $v_m = \\cfrac{v_0 + v}{2}$.",
+    dica2: "No MUV, a velocidade média é a média aritmética dos extremos: $v_m = \\frac{v_0 + v}{2}$.",
     dica3: "Some 5 com 25 e divida por 2.",
     gabarito: {
       fase1: ["$v_0 = 5\\text{ m/s}$", "$v = 25\\text{ m/s}$"],
-      fase2: "Velocidade Média no MUV: $v_m = \\cfrac{v_0 + v}{2}$",
-      fase3: ["$v_m = \\cfrac{5 + 25}{2} = \\cfrac{30}{2}$", "$\\mathbf{v_m = 15\\text{ m/s}}$"]
+      fase2: "Velocidade Média no MUV: $v_m = \\frac{v_0 + v}{2}$",
+      fase3: ["$v_m = \\frac{5 + 25}{2} = \\frac{30}{2}$", "$\\mathbf{v_m = 15\\text{ m/s}}$"]
     }
   },
   {
@@ -232,11 +361,11 @@ const kit4 = [
     id: "K4_Q1", tipo: "facil", nivelTexto: "Fácil (2F)",
     enunciado: "Um drone parte com velocidade de $2\\text{ m/s}$ e acelera a uma taxa constante de $5\\text{ m/s}^2$. Qual será o deslocamento total realizado pelo drone após $4\\text{ segundos}$ de voo?",
     dica1: "Dados: $v_0 = 2\\text{ m/s}$, $a = 5\\text{ m/s}^2$ e $t = 4\\text{ s}$.",
-    dica2: "Função horária do deslocamento: $\\Delta S = v_0 t + \\cfrac{1}{2} a t^2$.",
-    dica3: "$v_0 t = 2(4) = 8$. Parcela acelerada: $\\cfrac{1}{2}(5)(16) = 40$. Some 8 com 40.",
+    dica2: "Função horária do deslocamento: $\\Delta S = v_0 t + \\frac{1}{2} a t^2$.",
+    dica3: "$v_0 t = 2(4) = 8$. Parcela acelerada: $\\frac{1}{2}(5)(16) = 40$. Some 8 com 40.",
     gabarito: {
       fase1: ["$v_0 = 2\\text{ m/s}$", "$a = 5\\text{ m/s}^2$", "$t = 4\\text{ s}$"],
-      fase2: "Deslocamento: $\\Delta S = v_0 t + \\cfrac{1}{2} a t^2$",
+      fase2: "Deslocamento: $\\Delta S = v_0 t + \\frac{1}{2} a t^2$",
       fase3: ["$\\Delta S = 8 + 40$", "$\\mathbf{\\Delta S = 48\\text{ m}}$"]
     }
   },
@@ -249,7 +378,7 @@ const kit4 = [
     gabarito: {
       fase1: ["$S(t) = 45 + 9t$", "$S = 117\\text{ m}$"],
       fase2: "Equação: $117 = 45 + 9t$",
-      fase3: ["$9t = 72 \\implies t = \\cfrac{72}{9}$", "$\\mathbf{t = 8\\text{ s}}$"]
+      fase3: ["$9t = 72 \\implies t = \\frac{72}{9}$", "$\\mathbf{t = 8\\text{ s}}$"]
     }
   },
   {
@@ -324,7 +453,7 @@ const kit5 = [
     gabarito: {
       fase1: ["$v_0 = 0$", "$v = 60\\text{ m/s}$", "$\\Delta S = 90\\text{ m}$"],
       fase2: "Torricelli: $v^2 = v_0^2 + 2 a \\Delta S$",
-      fase3: ["$3.600 = 180 a \\implies a = \\cfrac{3.600}{180}$", "$\\mathbf{a = 20\\text{ m/s}^2}$"]
+      fase3: ["$3.600 = 180 a \\implies a = \\frac{3.600}{180}$", "$\\mathbf{a = 20\\text{ m/s}^2}$"]
     }
   },
   {
@@ -358,11 +487,11 @@ const kit6 = [
     id: "K6_Q1", tipo: "facil", nivelTexto: "Fácil (2F)",
     enunciado: "Um veículo com velocidade de $12\\text{ m/s}$ acelera uniformemente a $4\\text{ m/s}^2$ durante $5\\text{ segundos}$. Qual o deslocamento total percorrido pelo veículo nesse intervalo de tempo?",
     dica1: "Dados: $v_0 = 12\\text{ m/s}$, $a = 4\\text{ m/s}^2$ e $t = 5\\text{ s}$.",
-    dica2: "Função do deslocamento (Sorvetão): $\\Delta S = v_0 t + \\cfrac{1}{2} a t^2$.",
-    dica3: "$12(5) = 60$ e $\\cfrac{1}{2}(4)(25) = 50$. Some 60 com 50.",
+    dica2: "Função do deslocamento (Sorvetão): $\\Delta S = v_0 t + \\frac{1}{2} a t^2$.",
+    dica3: "$12(5) = 60$ e $\\frac{1}{2}(4)(25) = 50$. Some 60 com 50.",
     gabarito: {
       fase1: ["$v_0 = 12\\text{ m/s}$", "$a = 4\\text{ m/s}^2$", "$t = 5\\text{ s}$"],
-      fase2: "Deslocamento: $\\Delta S = v_0 t + \\cfrac{1}{2} a t^2$",
+      fase2: "Deslocamento: $\\Delta S = v_0 t + \\frac{1}{2} a t^2$",
       fase3: ["$\\Delta S = 60 + 50$", "$\\mathbf{\\Delta S = 110\\text{ m}}$"]
     }
   },
@@ -370,24 +499,24 @@ const kit6 = [
     id: "K6_Q2", tipo: "facil", nivelTexto: "Fácil (2F)",
     enunciado: "Um ciclista viaja em linha reta com velocidade constante de $15\\text{ m/s}$. Quanto tempo ele levará para percorrer uma distância de $450\\text{ metros}$?",
     dica1: "Dados: velocidade $v = 15\\text{ m/s}$ e distância $\\Delta S = 450\\text{ m}$.",
-    dica2: "Equação de tempo: $\\Delta t = \\cfrac{\\Delta S}{v}$.",
+    dica2: "Equação de tempo: $\\Delta t = \\frac{\\Delta S}{v}$.",
     dica3: "Divida 450 por 15.",
     gabarito: {
       fase1: ["$v = 15\\text{ m/s}$", "$\\Delta S = 450\\text{ m}$"],
-      fase2: "Equação: $\\Delta t = \\cfrac{\\Delta S}{v}$",
-      fase3: ["$\\Delta t = \\cfrac{450}{15}$", "$\\mathbf{\\Delta t = 30\\text{ s}}$"]
+      fase2: "Equação: $\\Delta t = \\frac{\\Delta S}{v}$",
+      fase3: ["$\\Delta t = \\frac{450}{15}$", "$\\mathbf{\\Delta t = 30\\text{ s}}$"]
     }
   },
   {
     id: "K6_Q3", tipo: "medio", nivelTexto: "Intermediário (2I)",
     enunciado: "Um automóvel esportivo acelera de $72\\text{ km/h}$ para $144\\text{ km/h}$ em um intervalo de $4\\text{ segundos}$. Qual a sua aceleração escalar média, em m/s²?",
     dica1: "Converta ambas as velocidades dividindo por 3,6: $72 / 3{,}6 = 20\\text{ m/s}$ e $144 / 3{,}6 = 40\\text{ m/s}$.",
-    dica2: "Aceleração média: $a_m = \\cfrac{\\Delta v}{\\Delta t} = \\cfrac{40 - 20}{4}$.",
+    dica2: "Aceleração média: $a_m = \\frac{\\Delta v}{\\Delta t} = \\frac{40 - 20}{4}$.",
     dica3: "Divida 20 por 4.",
     gabarito: {
       fase1: ["$v_0 = 20\\text{ m/s}$", "$v = 40\\text{ m/s}$", "$\\Delta t = 4\\text{ s}$"],
-      fase2: "Aceleração: $a_m = \\cfrac{v - v_0}{\\Delta t}$",
-      fase3: ["$a_m = \\cfrac{20}{4}$", "$\\mathbf{a_m = 5\\text{ m/s}^2}$"]
+      fase2: "Aceleração: $a_m = \\frac{v - v_0}{\\Delta t}$",
+      fase3: ["$a_m = \\frac{20}{4}$", "$\\mathbf{a_m = 5\\text{ m/s}^2}$"]
     }
   },
   {
@@ -399,7 +528,7 @@ const kit6 = [
     gabarito: {
       fase1: ["$v_0 = 30\\text{ m/s}$", "$v = 0$", "$a = -3\\text{ m/s}^2$"],
       fase2: "Torricelli: $v^2 = v_0^2 + 2 a \\Delta S$",
-      fase3: ["$6\\Delta S = 900 \\implies \\Delta S = \\cfrac{900}{6}$", "$\\mathbf{\\Delta S = 150\\text{ m}}$"]
+      fase3: ["$6\\Delta S = 900 \\implies \\Delta S = \\frac{900}{6}$", "$\\mathbf{\\Delta S = 150\\text{ m}}$"]
     }
   },
   {
@@ -429,60 +558,16 @@ function obterQuestaoPorId(id) {
 function obterTodasPorNivel(nivel) {
   const lista = [];
   for (let k = 1; k <= 6; k++) {
-    BANCO_KITS[k].forEach(q => {
-      if (q.tipo === nivel) lista.push(q);
-    });
+    BANCO_KITS[k].forEach(q => { if (q.tipo === nivel) lista.push(q); });
   }
   return lista;
 }
 
-const TODAS_FACEIS = obterTodasPorNivel('facil');
-const TODAS_MEDIAS = obterTodasPorNivel('medio');
-const TODAS_DIFICEIS = obterTodasPorNivel('dificil');
+const TODAS_FACEIS = obterTodasPorNivel('facil');   // 12
+const TODAS_MEDIAS = obterTodasPorNivel('medio');   // 12
+const TODAS_DIFICEIS = obterTodasPorNivel('dificil'); // 6
 
-// ===== ESTADO DO SISTEMA (localStorage) =====
-const CHAVE_STORAGE = "CINEMATICA_TREINO_PROFA_V7";
-const ESTADO_PADRAO = {
-  nomeAluno: "",
-  acordoAceito: false,
-  barraRecolhida: false,
-  kitAtivo: 1,
-  respostas: {},
-  modoProfessor: false,
-  avaliacao: {
-    semente: null,
-    questoesIds: [],
-    etapaAtual: 'pre_prova',
-    tempoRestante: 0,
-    tempoTotalGasto: 0
-  }
-};
-
-let ESTADO = {};
-
-function carregarStorage() {
-  const salvo = localStorage.getItem(CHAVE_STORAGE);
-  if (salvo) {
-    try {
-      ESTADO = { ...ESTADO_PADRAO, ...JSON.parse(salvo) };
-    } catch (e) {
-      ESTADO = { ...ESTADO_PADRAO };
-    }
-  } else {
-    ESTADO = { ...ESTADO_PADRAO };
-  }
-  return ESTADO;
-}
-
-function salvarStorage() {
-  try {
-    localStorage.setItem(CHAVE_STORAGE, JSON.stringify(ESTADO));
-  } catch (e) {
-    console.error("Erro ao salvar LocalStorage:", e);
-  }
-}
-
-// ===== REGRAS DE CONCLUSÃO E EMBLEMAS =====
+// ===== 8. REGRAS DE CONCLUSÃO E EMBLEMAS =====
 function isQuestaoConcluida(id) {
   return Boolean(ESTADO.respostas[id]?.concluida);
 }
@@ -505,21 +590,16 @@ function contarQuestoesConcluidas() {
   return Object.values(ESTADO.respostas || {}).filter(r => r.concluida).length;
 }
 
-// ===== RESET POR KIT =====
 function resetarKitEspecifico(kitNum) {
-  if (!confirm(`Deseja realmente zerar o progresso do Kit ${kitNum}? Apenas os dados deste kit serão reiniciados.`)) {
-    return;
-  }
+  if (!confirm(`Deseja realmente zerar o progresso do Kit ${kitNum}? Apenas os dados deste kit serão reiniciados.`)) return;
   const questoes = BANCO_KITS[kitNum] || [];
-  questoes.forEach(q => {
-    delete ESTADO.respostas[q.id];
-  });
+  questoes.forEach(q => { delete ESTADO.respostas[q.id]; });
   salvarStorage();
   renderizarTudo();
 }
 window.resetarKitEspecifico = resetarKitEspecifico;
 
-// ===== LATEX FORMATTER =====
+// ===== 9. LATEX RENDERER =====
 function garantirRenderizacaoLatex(container) {
   if (window.renderMathInElement && container) {
     try {
@@ -536,14 +616,15 @@ function garantirRenderizacaoLatex(container) {
   }
 }
 
-// ===== CRONÔMETRO DAS 3 FASES =====
+// ===== 10. CRONÔMETRO DAS 3 FASES (KITS) =====
 let timerInterval = null;
 let cronoAtivo = { questId: null, faseNum: null, inicioTimestamp: null };
 
 function getDadosQuestao(questId) {
   if (!ESTADO.respostas[questId]) {
     ESTADO.respostas[questId] = {
-      fase1_t: null, fase2_t: null, fase3_t: null, tempoTotal: 0, concluida: false, dicasUsadas: 0
+      fase1_t: null, fase2_t: null, fase3_t: null,
+      tempoTotal: 0, concluida: false, dicasUsadas: 0
     };
   }
   return ESTADO.respostas[questId];
@@ -551,43 +632,44 @@ function getDadosQuestao(questId) {
 
 function acaoFase(questId, faseNum) {
   const dados = getDadosQuestao(questId);
-
-  // Parar cronômetro se já estiver ativo
   if (cronoAtivo.questId === questId && cronoAtivo.faseNum === faseNum) {
     const decorridoMs = Date.now() - cronoAtivo.inicioTimestamp;
     const s = Math.max(1, Math.round(decorridoMs / 1000));
     pararCronometro();
-
     dados[`fase${faseNum}_t`] = s;
     dados.tempoTotal = (dados.fase1_t || 0) + (dados.fase2_t || 0) + (dados.fase3_t || 0);
-
+        const eraConcluida = Boolean(dados.concluida);
     if (faseNum === 3 || (dados.fase1_t && dados.fase2_t && dados.fase3_t)) {
       dados.concluida = true;
+      if (!eraConcluida) {
+        if (!ESTADO.historico) ESTADO.historico = [];
+        ESTADO.historico.push({
+          id: Date.now().toString(),
+          questId: questId,
+          data: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+          f1: dados.fase1_t || 0,
+          f2: dados.fase2_t || 0,
+          f3: dados.fase3_t || 0,
+          total: dados.tempoTotal || 0
+        });
+      }
     }
-
     salvarStorage();
     renderizarTudo();
     return;
   }
-
-  // Se outro estiver ativo, pede confirmação
   if (cronoAtivo.questId !== null) {
-    if (!confirm("Há outro cronômetro em andamento. Deseja encerrá-lo e iniciar este?")) {
-      return;
-    }
+    if (!confirm("Há outro cronômetro em andamento. Deseja encerrá-lo e iniciar este?")) return;
     pararCronometro();
   }
-
   cronoAtivo.questId = questId;
   cronoAtivo.faseNum = faseNum;
   cronoAtivo.inicioTimestamp = Date.now();
-
   const elBtn = document.getElementById(`btn-fase-${questId}-${faseNum}`);
   if (elBtn) {
     elBtn.classList.add('btn-gravando');
     elBtn.textContent = '⏹️ Parar e Gravar';
   }
-
   timerInterval = setInterval(() => {
     const seg = Math.floor((Date.now() - cronoAtivo.inicioTimestamp) / 1000);
     const elRelogio = document.getElementById(`tempo-fase-${questId}-${faseNum}`);
@@ -597,16 +679,12 @@ function acaoFase(questId, faseNum) {
 window.acaoFase = acaoFase;
 
 function pararCronometro() {
-  if (timerInterval) {
-    clearInterval(timerInterval);
-    timerInterval = null;
-  }
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
   cronoAtivo.questId = null;
   cronoAtivo.faseNum = null;
   cronoAtivo.inicioTimestamp = null;
 }
 
-// Alternar Dica individual dentro de cada fase
 function alternarDicaFase(questId, faseNum) {
   const boxDica = document.getElementById(`dica-fase-${questId}-${faseNum}`);
   if (boxDica) {
@@ -618,7 +696,231 @@ function alternarDicaFase(questId, faseNum) {
 }
 window.alternarDicaFase = alternarDicaFase;
 
-// ===== RENDERIZAÇÃO GERAL =====
+// ===== 11. SISTEMA DE ZOOM =====
+let zoomTimeout = null;
+
+function aplicarZoom(nivel) {
+  const scale = Math.max(1.0, Math.min(2.0, nivel));
+  ESTADO.zoomLevel = scale;
+  document.documentElement.style.setProperty('--font-scale', scale);
+  salvarStorage();
+  atualizarIndicadorZoom();
+  reiniciarTimerOcultacaoZoom();
+}
+
+function atualizarIndicadorZoom() {
+  const indicador = document.getElementById('zoom-indicador');
+  if (indicador) indicador.textContent = `${Math.round(ESTADO.zoomLevel * 100)}%`;
+}
+
+function reiniciarTimerOcultacaoZoom() {
+  const controles = document.getElementById('controles-zoom');
+  if (!controles) return;
+  controles.classList.remove('oculto-zoom');
+  if (zoomTimeout) clearTimeout(zoomTimeout);
+  zoomTimeout = setTimeout(() => {
+    controles.classList.add('oculto-zoom');
+  }, 3000);
+}
+
+function iniciarControlesZoom() {
+  const btnIn = document.getElementById('btn-zoom-in');
+  const btnOut = document.getElementById('btn-zoom-out');
+  const controles = document.getElementById('controles-zoom');
+  if (btnIn) btnIn.addEventListener('click', () => aplicarZoom(ESTADO.zoomLevel + 0.1));
+  if (btnOut) btnOut.addEventListener('click', () => aplicarZoom(ESTADO.zoomLevel - 0.1));
+  if (controles) {
+    controles.addEventListener('mouseenter', () => {
+      if (zoomTimeout) clearTimeout(zoomTimeout);
+      controles.classList.remove('oculto-zoom');
+    });
+    controles.addEventListener('mouseleave', reiniciarTimerOcultacaoZoom);
+    controles.addEventListener('click', reiniciarTimerOcultacaoZoom);
+  }
+  aplicarZoom(ESTADO.zoomLevel || 1.5);
+}
+
+// ===== 12. NTP (SINCRONIZAÇÃO DE HORA) =====
+let OFFSET_NTP_MS = 0;
+let NTP_SINCRONIZADO = false;
+
+async function sincronizarNTP() {
+  const apis = [
+    {
+      url: 'https://worldtimeapi.org/api/timezone/America/Sao_Paulo',
+      parse: (data) => new Date(data.datetime).getTime()
+    },
+    {
+      url: 'https://timeapi.io/api/time/current/zone?timeZone=America/Sao_Paulo',
+      parse: (data) => {
+        const dt = data.dateTime || data.datetime;
+        return new Date(dt).getTime();
+      }
+    }
+  ];
+  for (const api of apis) {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 5000);
+      const resp = await fetch(api.url, { signal: controller.signal });
+      clearTimeout(timeout);
+      if (resp.ok) {
+        const data = await resp.json();
+        const horaNTP = api.parse(data);
+        if (!isNaN(horaNTP)) {
+          OFFSET_NTP_MS = horaNTP - Date.now();
+          NTP_SINCRONIZADO = true;
+          console.log("✓ NTP sincronizado. Offset:", OFFSET_NTP_MS, "ms");
+          return true;
+        }
+      }
+    } catch (e) {
+      console.warn('NTP falhou:', api.url, e.message);
+    }
+  }
+  NTP_SINCRONIZADO = false;
+  return false;
+}
+
+function agoraSincronizado() {
+  return new Date(Date.now() + OFFSET_NTP_MS);
+}
+
+// ===== 13. CÁLCULO DE TEMPO POR HORÁRIO DE AULA =====
+function horaParaSegundos(horaStr) {
+  const [h, m] = horaStr.split(':').map(Number);
+  return h * 3600 + m * 60;
+}
+
+function segundosParaHora(seg) {
+  const h = Math.floor(seg / 3600);
+  const m = Math.floor((seg % 3600) / 60);
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+}
+
+function formatarSegundos(s) {
+  if (!s || isNaN(s) || s < 0) return '00:00';
+  const m = Math.floor(s / 60);
+  const seg = Math.floor(s % 60);
+  return `${String(m).padStart(2, '0')}:${String(seg).padStart(2, '0')}`;
+}
+window.formatarSegundos = formatarSegundos;
+
+function calcularProvaSala() {
+  const agora = agoraSincronizado();
+  const segAtual = agora.getHours() * 3600 + agora.getMinutes() * 60 + agora.getSeconds();
+
+  let proximaAula = null;
+  for (const aula of HORARIOS_AULA) {
+    const fimSeg = horaParaSegundos(aula.fim);
+    if (fimSeg > segAtual) {
+      proximaAula = aula;
+      break;
+    }
+  }
+
+  if (!proximaAula) {
+    return { valido: false, motivo: 'fora_horario', mensagem: 'Fora do horário de aulas. Use o modo Simulado.' };
+  }
+
+  const sinalSeg = horaParaSegundos(proximaAula.fim);
+  const fechamentoSeg = sinalSeg - BUFFER_SINAL_SEG;
+  const tempoTotal = fechamentoSeg - segAtual;
+
+  if (tempoTotal <= 0) {
+    return { valido: false, motivo: 'tempo_insuficiente', mensagem: 'A aula está terminando. Aguarde o próximo período.' };
+  }
+
+  const MINIMO_VIAVEL = 10 * 60;
+  const ALERTA_MAXIMO = 15 * 60;
+  const TEMPO_PADRAO = 30 * 60;
+
+  const infoBase = {
+    aula: proximaAula,
+    sinal: segundosParaHora(sinalSeg),
+    fechamento: segundosParaHora(fechamentoSeg),
+    tempoTotal
+  };
+
+  if (tempoTotal < MINIMO_VIAVEL) {
+    return {
+      ...infoBase,
+      valido: false,
+      motivo: 'tempo_insuficiente',
+      mensagem: `⛔ Tempo insuficiente (${formatarSegundos(tempoTotal)}). Mínimo: 10 min. Aguarde a próxima aula.`
+    };
+  }
+
+  if (tempoTotal <= ALERTA_MAXIMO) {
+    const tempoCada = Math.floor(tempoTotal / 2);
+    return {
+      ...infoBase,
+      valido: true,
+      modo: 'reduzido_2questoes',
+      etapas: [
+        { nivel: 'facil', tempo: tempoCada },
+        { nivel: 'medio', tempo: tempoTotal - tempoCada }
+      ],
+      mensagem: '⚠️ Aula curta: prova reduzida para 2 questões (Fácil + Média).'
+    };
+  }
+
+  if (tempoTotal < TEMPO_PADRAO) {
+    const deficit = TEMPO_PADRAO - tempoTotal;
+    const reducaoPorQuestao = Math.ceil(deficit / 3);
+    return {
+      ...infoBase,
+      valido: true,
+      modo: 'penalidade_proporcional',
+      etapas: [
+        { nivel: 'facil', tempo: Math.max(60, 8 * 60 - reducaoPorQuestao) },
+        { nivel: 'medio', tempo: Math.max(60, 10 * 60 - reducaoPorQuestao) },
+        { nivel: 'dificil', tempo: Math.max(60, 12 * 60 - reducaoPorQuestao) }
+      ],
+      mensagem: `⏱️ Penalidade por atraso: ${reducaoPorQuestao}s a menos por questão.`
+    };
+  }
+
+  return {
+    ...infoBase,
+    valido: true,
+    modo: 'padrao',
+    etapas: [
+      { nivel: 'facil', tempo: 8 * 60 },
+      { nivel: 'medio', tempo: 10 * 60 },
+      { nivel: 'dificil', tempo: 12 * 60 },
+      { nivel: 'revisao', tempo: tempoTotal - TEMPO_PADRAO }
+    ],
+    mensagem: ''
+  };
+}
+
+// ===== 14. SORTEIO COM SEED REPRODUTÍVEL =====
+function sortearComSeed(seed) {
+  const s = Math.max(1, Math.min(TOTAL_COMBINACOES, seed)) - 1;
+  const indiceFacil = s % TODAS_FACEIS.length;
+  const indiceMedio = Math.floor(s / TODAS_FACEIS.length) % TODAS_MEDIAS.length;
+  const indiceDificil = Math.floor(s / (TODAS_FACEIS.length * TODAS_MEDIAS.length)) % TODAS_DIFICEIS.length;
+  return {
+    facil: TODAS_FACEIS[indiceFacil],
+    medio: TODAS_MEDIAS[indiceMedio],
+    dificil: TODAS_DIFICEIS[indiceDificil]
+  };
+}
+
+function gerarSeedAleatorio() {
+  return Math.floor(Math.random() * TOTAL_COMBINACOES) + 1;
+}
+
+// ===== 15. ESTADO DA PROVA =====
+let timerAvaliacao = null;
+let etapasProvaAtual = [];
+let indiceEtapaAtual = 0;
+let tempoRestanteEtapa = 0;
+let tempoMaximoEtapa = 0;
+let fechamentoProvaTimestamp = null;
+
+// ===== 16. RENDERIZAÇÃO GERAL =====
 function renderizarTudo() {
   atualizarBarraTopo();
   renderizarQuadroEquacoes();
@@ -626,12 +928,10 @@ function renderizarTudo() {
   renderizarAbaAtual();
 }
 
-// 1. Barra Superior de Progresso e Ocultação
 function atualizarBarraTopo() {
   const barra = document.getElementById('barra-topo-principal');
   const btnReabrir = document.getElementById('btn-reabrir-topo');
   const pctMini = document.getElementById('reabrir-pct-mini');
-
   const nome = ESTADO.nomeAluno.trim();
   const rotuloNome = document.getElementById('rotulo-nome-topo');
   const tagAcordo = document.getElementById('status-acordo-tag');
@@ -646,7 +946,6 @@ function atualizarBarraTopo() {
   if (rotuloNome) rotuloNome.textContent = nome.length > 0 ? nome : "Estudante";
   if (inputNome && document.activeElement !== inputNome) inputNome.value = nome;
   if (chkAcordo) chkAcordo.checked = Boolean(ESTADO.acordoAceito);
-
   if (tagAcordo) {
     if (ESTADO.acordoAceito && nome.length > 0) {
       tagAcordo.className = "badge-acordo assinado";
@@ -657,7 +956,6 @@ function atualizarBarraTopo() {
     }
   }
 
-  // Cálculo percentual geral (30 questões)
   const totalFeitas = contarQuestoesConcluidas();
   const pct = Math.round((totalFeitas / 30) * 100);
   const kitsCompletos = getQuantidadeKitsConcluidos();
@@ -668,7 +966,6 @@ function atualizarBarraTopo() {
   if (barraFill) barraFill.style.width = `${pct}%`;
   if (statusGeral) statusGeral.textContent = `${kitsCompletos} de 6 Kits Concluídos`;
 
-  // Status de Visibilidade da Barra
   if (barra && btnReabrir) {
     if (ESTADO.barraRecolhida) {
       barra.classList.add('oculto');
@@ -679,7 +976,6 @@ function atualizarBarraTopo() {
     }
   }
 
-  // Liberação da Aba de Prova (requer 6 kits)
   const provaLiberada = (kitsCompletos === 6) || ESTADO.modoProfessor;
   if (btnAbaProva) {
     if (provaLiberada) {
@@ -694,52 +990,32 @@ function atualizarBarraTopo() {
   }
 }
 
-// 2. Mural de Emblemas (com ícone SVG permanente na madeira)
 function renderizarMuralMedalhas() {
   const container = document.getElementById('grade-medalhas');
   if (!container) return;
-
   const kitsConcluidos = getQuantidadeKitsConcluidos();
   container.innerHTML = '';
-
   EMBLEMAS.forEach(emb => {
     const conquistada = kitsConcluidos >= emb.kitsNecessarios;
     const card = document.createElement('div');
     card.className = `card-medalha ${conquistada ? 'conquistada' : ''}`;
-    card.innerHTML = `
-      <span class="icone-medalha">${emb.icone}</span>
-      <div class="nome-medalha">${emb.nome}</div>
-      <div class="meta-medalha">${emb.kitsNecessarios} ${emb.kitsNecessarios === 1 ? 'Kit concluído' : 'Kits concluídos'}</div>
-    `;
+    card.innerHTML = `<span class="icone-medalha">${emb.icone}</span><div class="nome-medalha">${emb.nome}</div><div class="meta-medalha">${emb.kitsNecessarios} ${emb.kitsNecessarios === 1 ? 'Kit concluído' : 'Kits concluídos'}</div>`;
     card.title = conquistada ? `Conquistado! ${emb.mensagem}` : `Bloqueado. Conclua quaisquer ${emb.kitsNecessarios} kits para destravar.`;
     container.appendChild(card);
   });
 }
 
-// 3. Quadro de Equações
 function renderizarQuadroEquacoes() {
   const painel = document.getElementById('painel-equacoes');
   const painelOverlay = document.getElementById('painel-equacoes-overlay');
   if (!painel) return;
-
-  const htmlFormulas = DATABASE_EQUACOES.map(eq => `
-    <div class="card-formula">
-      <div style="display:flex; justify-content:space-between; align-items:center;">
-        <span class="tag-tipo">${eq.badge}</span>
-        <strong style="font-size: 1.05rem; color: var(--ink);">${eq.concept}</strong>
-      </div>
-      <div class="formula-render">$${eq.katex}$</div>
-      <div style="font-size:0.85rem; color:#495057;">${eq.desc}</div>
-    </div>
-  `).join('');
-
+  const htmlFormulas = DATABASE_EQUACOES.map(eq => `<div class="card-formula"><div style="display:flex; justify-content:space-between; align-items:center;"><span class="tag-tipo">${eq.badge}</span><strong style="font-size: 1.05rem; color: var(--ink);">${eq.concept}</strong></div><div class="formula-render">$${eq.katex}$</div><div style="font-size:0.85rem; color:#495057;">${eq.desc}</div></div>`).join('');
   painel.innerHTML = htmlFormulas;
   if (painelOverlay) painelOverlay.innerHTML = htmlFormulas;
   garantirRenderizacaoLatex(painel);
   if (painelOverlay) garantirRenderizacaoLatex(painelOverlay);
 }
 
-// 4. Renderização do Kit com DICAS INTEGRADAS DENTRO DE CADA FASE
 function renderizarAbaAtual() {
   const kitId = ESTADO.kitAtivo;
   const secKit = document.getElementById('conteudo-kit');
@@ -757,7 +1033,6 @@ function renderizarAbaAtual() {
     renderizarPainelCertificado();
     return;
   }
-
   if (kitId === 'prova') {
     secKit.classList.add('oculto');
     secCert.classList.add('oculto');
@@ -766,7 +1041,6 @@ function renderizarAbaAtual() {
     return;
   }
 
-  // Kits 1 a 6
   secKit.classList.remove('oculto');
   secCert.classList.add('oculto');
   secProva.classList.add('oculto');
@@ -775,24 +1049,11 @@ function renderizarAbaAtual() {
   const questoes = BANCO_KITS[kitNum] || [];
   const kitFinalizado = isKitConcluido(kitNum);
 
-  let html = `
-    <div class="topo-kit-ativo">
-      <div>
-        <h2 class="titulo-kit">Caderno de Exercícios &bull; Kit ${kitNum}</h2>
-        <span style="font-size: 1.1rem; color: #495057;">
-          ${questoes.filter(q => isQuestaoConcluida(q.id)).length} de 5 questões concluídas
-        </span>
-      </div>
-      <button type="button" class="btn-reset-kit" onclick="resetarKitEspecifico(${kitNum})">
-        🔄 Zerar este Kit ${kitNum}
-      </button>
-    </div>
-  `;
+  let html = `<div class="topo-kit-ativo"><div><h2 class="titulo-kit">Caderno de Exercícios &bull; Kit ${kitNum}</h2><span style="font-size: 1.1rem; color: #495057;">${questoes.filter(q => isQuestaoConcluida(q.id)).length} de 5 questões concluídas</span></div><button type="button" class="btn-reset-kit" onclick="resetarKitEspecifico(${kitNum})">🔄 Zerar este Kit ${kitNum}</button></div>`;
 
   questoes.forEach((q, idx) => {
     const dados = getDadosQuestao(q.id);
     const concluida = dados.concluida;
-
     html += `
       <article class="questao-card" id="card-${q.id}">
         <div class="card-cabecalho">
@@ -801,112 +1062,52 @@ function renderizarAbaAtual() {
           <span style="font-family:'Fira Code', monospace; color:#868e96; font-size:0.95rem;">ID: ${q.id}</span>
           ${concluida ? '<span style="color:var(--green); font-weight:bold; margin-left:auto;">✓ Concluída</span>' : ''}
         </div>
-        
         <div class="enunciado" style="font-size: 1.25rem; margin: 14px 0;">${q.enunciado}</div>
-
-        <!-- Grade das 3 Fases com Dica Associada a Cada Uma -->
         <div class="fases-grade">
-          
-          <!-- Fase 1 -->
           <div class="bloco-fase ${dados.fase1_t ? 'concluida' : ''}">
-            <div class="titulo-fase">
-              <span>I. Dados Isolados</span>
-              <span class="cronometro-fase" id="tempo-fase-${q.id}-1">${dados.fase1_t ? `${dados.fase1_t}s` : '--'}</span>
-            </div>
-            <button type="button" id="btn-fase-${q.id}-1" class="btn-acao ${dados.fase1_t ? 'concluido' : ''}" onclick="acaoFase('${q.id}', 1)">
-              ${dados.fase1_t ? `✓ Feito (${dados.fase1_t}s)` : '▶️ Iniciar Fase 1'}
-            </button>
-            <button type="button" class="btn-dica-fase" onclick="alternarDicaFase('${q.id}', 1)">
-              💡 Dica da Fase 1 (Dados)
-            </button>
-            <div id="dica-fase-${q.id}-1" class="caixa-dica-fase oculto">
-              ${q.dica1}
-            </div>
+            <div class="titulo-fase"><span>I. Dados Isolados</span><span class="cronometro-fase" id="tempo-fase-${q.id}-1">${dados.fase1_t ? `${dados.fase1_t}s` : '--'}</span></div>
+            <button type="button" id="btn-fase-${q.id}-1" class="btn-acao ${dados.fase1_t ? 'concluido' : ''}" onclick="acaoFase('${q.id}', 1)">${dados.fase1_t ? `✓ Feito (${dados.fase1_t}s)` : '▶️ Iniciar Fase 1'}</button>
+            <button type="button" class="btn-dica-fase" onclick="alternarDicaFase('${q.id}', 1)">💡 Dica da Fase 1 (Dados)</button>
+            <div id="dica-fase-${q.id}-1" class="caixa-dica-fase oculto">${q.dica1}</div>
           </div>
-
-          <!-- Fase 2 -->
           <div class="bloco-fase ${dados.fase2_t ? 'concluida' : ''}">
-            <div class="titulo-fase">
-              <span>II. Equação</span>
-              <span class="cronometro-fase" id="tempo-fase-${q.id}-2">${dados.fase2_t ? `${dados.fase2_t}s` : '--'}</span>
-            </div>
-            <button type="button" id="btn-fase-${q.id}-2" class="btn-acao ${dados.fase2_t ? 'concluido' : ''}" onclick="acaoFase('${q.id}', 2)">
-              ${dados.fase2_t ? `✓ Feito (${dados.fase2_t}s)` : '▶️ Iniciar Fase 2'}
-            </button>
-            <button type="button" class="btn-dica-fase" onclick="alternarDicaFase('${q.id}', 2)">
-              💡 Dica da Fase 2 (Equação)
-            </button>
-            <div id="dica-fase-${q.id}-2" class="caixa-dica-fase oculto">
-              ${q.dica2}
-            </div>
+            <div class="titulo-fase"><span>II. Equação</span><span class="cronometro-fase" id="tempo-fase-${q.id}-2">${dados.fase2_t ? `${dados.fase2_t}s` : '--'}</span></div>
+            <button type="button" id="btn-fase-${q.id}-2" class="btn-acao ${dados.fase2_t ? 'concluido' : ''}" onclick="acaoFase('${q.id}', 2)">${dados.fase2_t ? `✓ Feito (${dados.fase2_t}s)` : '▶️ Iniciar Fase 2'}</button>
+            <button type="button" class="btn-dica-fase" onclick="alternarDicaFase('${q.id}', 2)">💡 Dica da Fase 2 (Equação)</button>
+            <div id="dica-fase-${q.id}-2" class="caixa-dica-fase oculto">${q.dica2}</div>
           </div>
-
-          <!-- Fase 3 -->
           <div class="bloco-fase ${dados.fase3_t ? 'concluida' : ''}">
-            <div class="titulo-fase">
-              <span>III. Resolução</span>
-              <span class="cronometro-fase" id="tempo-fase-${q.id}-3">${dados.fase3_t ? `${dados.fase3_t}s` : '--'}</span>
-            </div>
-            <button type="button" id="btn-fase-${q.id}-3" class="btn-acao ${dados.fase3_t ? 'concluido' : ''}" onclick="acaoFase('${q.id}', 3)">
-              ${dados.fase3_t ? `✓ Feito (${dados.fase3_t}s)` : '▶️ Iniciar Fase 3'}
-            </button>
-            <button type="button" class="btn-dica-fase" onclick="alternarDicaFase('${q.id}', 3)">
-              💡 Dica da Fase 3 (Cálculo)
-            </button>
-            <div id="dica-fase-${q.id}-3" class="caixa-dica-fase oculto">
-              ${q.dica3}
-            </div>
+            <div class="titulo-fase"><span>III. Resolução</span><span class="cronometro-fase" id="tempo-fase-${q.id}-3">${dados.fase3_t ? `${dados.fase3_t}s` : '--'}</span></div>
+            <button type="button" id="btn-fase-${q.id}-3" class="btn-acao ${dados.fase3_t ? 'concluido' : ''}" onclick="acaoFase('${q.id}', 3)">${dados.fase3_t ? `✓ Feito (${dados.fase3_t}s)` : '▶️ Iniciar Fase 3'}</button>
+            <button type="button" class="btn-dica-fase" onclick="alternarDicaFase('${q.id}', 3)">💡 Dica da Fase 3 (Cálculo)</button>
+            <div id="dica-fase-${q.id}-3" class="caixa-dica-fase oculto">${q.dica3}</div>
           </div>
-
         </div>
-      </article>
-    `;
+      </article>`;
   });
 
-  // Gabarito do Kit (apenas quando 5 questões estiverem concluídas)
   if (kitFinalizado) {
-    html += `
-      <section class="box-gabarito-kit">
-        <h3 style="color: var(--green); font-size: 1.8rem; margin-top: 0;">🎉 Gabarito Didático Completo &bull; Kit ${kitNum}</h3>
-        <p>Parabéns! Todas as 5 questões deste kit foram concluídas. Confira a resolução oficial:</p>
-        <div class="lista-resolucoes">
-    `;
-
+    html += `<section class="box-gabarito-kit"><h3 style="color: var(--green); font-size: 1.8rem; margin-top: 0;">🎉 Gabarito Didático Completo &bull; Kit ${kitNum}</h3><p>Parabéns! Todas as 5 questões deste kit foram concluídas. Confira a resolução oficial:</p><div class="lista-resolucoes">`;
     questoes.forEach((q, i) => {
-      html += `
-        <div style="border-top: 1px dashed #ced4da; padding: 12px 0;">
-          <h4 style="margin: 0 0 6px 0; font-size: 1.35rem;">Questão ${i + 1} (${q.id}):</h4>
-          <div style="margin-left: 10px; font-size: 1.1rem;">
-            <div><strong>I. Dados:</strong> ${q.gabarito.fase1.join(' &bull; ')}</div>
-            <div><strong>II. Equação:</strong> ${q.gabarito.fase2}</div>
-            <div><strong>III. Resolução:</strong> ${q.gabarito.fase3.join(' ➔ ')}</div>
-          </div>
-        </div>
-      `;
+      html += `<div style="border-top: 1px dashed #ced4da; padding: 12px 0;"><h4 style="margin: 0 0 6px 0; font-size: 1.35rem;">Questão ${i + 1} (${q.id}):</h4><div style="margin-left: 10px; font-size: 1.1rem;"><div><strong>I. Dados:</strong> ${q.gabarito.fase1.join(' &bull; ')}</div><div><strong>II. Equação:</strong> ${q.gabarito.fase2}</div><div><strong>III. Resolução:</strong> ${q.gabarito.fase3.join(' ➔ ')}</div></div></div>`;
     });
-
     html += `</div></section>`;
   } else {
-    html += `
-      <div class="box-gabarito-bloqueado">
-        🔒 <strong>Gabarito do Kit ${kitNum} Bloqueado:</strong> Conclua as 5 questões deste kit para liberar as resoluções passo a passo.
-      </div>
-    `;
+    html += `<div class="box-gabarito-bloqueado">🔒 <strong>Gabarito do Kit ${kitNum} Bloqueado:</strong> Conclua as 5 questões deste kit para liberar as resoluções passo a passo.</div>`;
   }
 
   secKit.innerHTML = html;
   garantirRenderizacaoLatex(secKit);
 }
 
-// 5. Painel de Certificado
 function renderizarPainelCertificado() {
   const statusGrid = document.getElementById('grade-kits-status');
   const diplomaNome = document.getElementById('diploma-nome-exibicao');
   const dataCert = document.getElementById('data-cert');
   const diplomaMedalhas = document.getElementById('medalhas-diploma');
   const diplomaResumo = document.getElementById('resumo-diploma');
-
   const nome = ESTADO.nomeAluno.trim();
+
   if (diplomaNome) diplomaNome.textContent = nome.length > 0 ? nome : "Estudante";
   if (dataCert) dataCert.textContent = new Date().toLocaleDateString('pt-BR');
 
@@ -917,46 +1118,50 @@ function renderizarPainelCertificado() {
       const qtdFeitas = BANCO_KITS[k].filter(q => isQuestaoConcluida(q.id)).length;
       const card = document.createElement('div');
       card.className = `card-kit-metrica ${conc ? 'concluido' : ''}`;
-      card.innerHTML = `
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <strong style="font-size: 1.3rem;">Kit ${k}</strong>
-          <span>${conc ? '✅ Concluído' : `${qtdFeitas}/5 Feitas`}</span>
-        </div>
-        <p style="font-size:0.95rem; margin:8px 0; color:#495057;">
-          ${conc ? 'Gabarito liberado e domínio consolidado.' : 'Resolva as 5 questões para destravar o gabarito.'}
-        </p>
-        <button type="button" class="btn-acao pequeno" onclick="mudarAba(${k})">Abrir Kit ${k}</button>
-      `;
+      card.innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center;"><strong style="font-size: 1.3rem;">Kit ${k}</strong><span>${conc ? '✅ Concluído' : `${qtdFeitas}/5 Feitas`}</span></div><p style="font-size:0.95rem; margin:8px 0; color:#495057;">${conc ? 'Gabarito liberado e domínio consolidado.' : 'Resolva as 5 questões para destravar o gabarito.'}</p><button type="button" class="btn-acao pequeno" onclick="mudarAba(${k})">Abrir Kit ${k}</button>`;
       statusGrid.appendChild(card);
     }
   }
 
   const kitsConcluidos = getQuantidadeKitsConcluidos();
   if (diplomaResumo) {
-    diplomaResumo.innerHTML = `
-      <div style="font-size: 1.3rem; margin: 12px 0;">
-        <strong>Kits Concluídos:</strong> ${kitsConcluidos} de 6 &bull; 
-        <strong>Questões Finalizadas:</strong> ${contarQuestoesConcluidas()} de 30
-      </div>
-    `;
+    diplomaResumo.innerHTML = `<div style="font-size: 1.3rem; margin: 12px 0;"><strong>Kits Concluídos:</strong> ${kitsConcluidos} de 6 &bull; <strong>Questões Finalizadas:</strong> ${contarQuestoesConcluidas()} de 30</div>`;
   }
-
   if (diplomaMedalhas) {
-    const iconesGanhos = EMBLEMAS.filter(e => kitsConcluidos >= e.kitsNecessarios)
-      .map(e => `<span style="margin: 0 4px;">${e.icone}</span>`).join('');
+    const iconesGanhos = EMBLEMAS.filter(e => kitsConcluidos >= e.kitsNecessarios).map(e => `<span style="margin: 0 4px;">${e.icone}</span>`).join('');
     diplomaMedalhas.innerHTML = `<div style="font-size: 2.2rem; display: flex; justify-content: center; align-items: center; gap: 8px;">${iconesGanhos || '🌱'}</div>`;
   }
+  
+    // ===== MÉTRICAS VISUAIS =====
+  let tempoTotalGlobal = 0, somaF1 = 0, somaF2 = 0, somaF3 = 0;
+  let contF1 = 0, contF2 = 0, contF3 = 0;
+  Object.values(ESTADO.respostas || {}).forEach(r => {
+    if (r.concluida) {
+      tempoTotalGlobal += (r.tempoTotal || 0);
+      if (r.fase1_t) { somaF1 += r.fase1_t; contF1++; }
+      if (r.fase2_t) { somaF2 += r.fase2_t; contF2++; }
+      if (r.fase3_t) { somaF3 += r.fase3_t; contF3++; }
+    }
+  });
+  const medF1 = contF1 > 0 ? Math.round(somaF1 / contF1) : 0;
+  const medF2 = contF2 > 0 ? Math.round(somaF2 / contF2) : 0;
+  const medF3 = contF3 > 0 ? Math.round(somaF3 / contF3) : 0;
+  if (diplomaResumo) {
+    diplomaResumo.innerHTML += `<div style="margin-top:6px;">Tempo Total Acumulado: <strong>${formatarSegundos(tempoTotalGlobal)}</strong> &bull; Média por Questão: <strong>${formatarSegundos(contF1 ? Math.round(tempoTotalGlobal / contarQuestoesConcluidas()) : 0)}</strong></div>`;
+  }
+  requestAnimationFrame(() => {
+    desenharGraficoFases(medF1, medF2, medF3);
+    desenharGraficoNiveis();
+  });
+  renderizarTabelaHistorico();
 }
 
-// ===== SEÇÃO DE PROVA / SIMULADO =====
-let timerAvaliacao = null;
-
+// ===== 17. SEÇÃO DE PROVA / SIMULADO =====
 function renderizarPainelProvaSimulado() {
   const pBloqueio = document.getElementById('painel-bloqueio-prova');
   const pPre = document.getElementById('painel-pre-prova');
   const pExec = document.getElementById('painel-execucao-prova');
   const pFim = document.getElementById('painel-fim-prova');
-
   const kitsConcluidos = getQuantidadeKitsConcluidos();
   const liberada = (kitsConcluidos === 6) || ESTADO.modoProfessor;
 
@@ -981,6 +1186,7 @@ function renderizarPainelProvaSimulado() {
     pPre.classList.remove('oculto');
     pExec.classList.add('oculto');
     pFim.classList.add('oculto');
+    atualizarInfoModoSala();
   } else {
     pPre.classList.add('oculto');
     pExec.classList.remove('oculto');
@@ -989,43 +1195,161 @@ function renderizarPainelProvaSimulado() {
   }
 }
 
-function executarSorteioAvaliacao() {
-  const boxRelogio = document.getElementById('animacao-relogio');
-  const btnIniciar = document.getElementById('btn-iniciar-avaliacao-oficial');
-
-  btnIniciar.disabled = true;
-  boxRelogio.classList.remove('oculto');
-
-  setTimeout(() => {
-    const qFacil = TODAS_FACEIS[Math.floor(Math.random() * TODAS_FACEIS.length)];
-    const qMedia = TODAS_MEDIAS[Math.floor(Math.random() * TODAS_MEDIAS.length)];
-    const qDificil = TODAS_DIFICEIS[Math.floor(Math.random() * TODAS_DIFICEIS.length)];
-    const semente = Math.floor(100 + Math.random() * 900);
-
-    ESTADO.avaliacao.semente = semente;
-    ESTADO.avaliacao.questoesIds = [qFacil.id, qMedia.id, qDificil.id];
-    ESTADO.avaliacao.etapaAtual = 'facil';
-    ESTADO.avaliacao.tempoRestante = TEMPOS_AVALIACAO.facil;
-    ESTADO.avaliacao.tempoTotalGasto = 0;
-    salvarStorage();
-
-    btnIniciar.disabled = false;
-    boxRelogio.classList.add('oculto');
-    renderizarPainelProvaSimulado();
-  }, 1000);
+function atualizarInfoModoSala() {
+  const radios = document.querySelectorAll('input[name="modo-prova"]');
+  const infoSala = document.getElementById('info-modo-sala');
+  radios.forEach(radio => {
+    radio.addEventListener('change', () => {
+      if (radio.value === 'sala' && radio.checked) {
+        infoSala.classList.remove('oculto');
+        calcularEExibirInfoSala();
+      } else {
+        infoSala.classList.add('oculto');
+      }
+    });
+  });
 }
 
+async function calcularEExibirInfoSala() {
+  const elAula = document.getElementById('info-aula-atual');
+  const elSinal = document.getElementById('info-sinal');
+  const elEncerramento = document.getElementById('info-encerramento');
+  const elTempoTotal = document.getElementById('info-tempo-total');
+  const elTempoRevisao = document.getElementById('info-tempo-revisao');
+
+  elAula.textContent = 'Sincronizando NTP...';
+  const okNTP = await sincronizarNTP();
+
+  if (!okNTP) {
+    elAula.textContent = '❌ Falha na sincronização NTP. Verifique a internet.';
+    elSinal.textContent = '--';
+    elEncerramento.textContent = '--';
+    elTempoTotal.textContent = '--';
+    elTempoRevisao.textContent = '--';
+    return;
+  }
+
+  const resultado = calcularProvaSala();
+  if (!resultado.valido) {
+    elAula.textContent = resultado.mensagem;
+    elSinal.textContent = resultado.sinal || '--';
+    elEncerramento.textContent = resultado.fechamento || '--';
+    elTempoTotal.textContent = '--';
+    elTempoRevisao.textContent = '--';
+    return;
+  }
+
+  elAula.textContent = `${resultado.aula.periodo} • ${resultado.aula.inicio} - ${resultado.aula.fim}`;
+  elSinal.textContent = resultado.sinal;
+  elEncerramento.textContent = resultado.fechamento;
+  elTempoTotal.textContent = formatarSegundos(resultado.tempoTotal);
+  const etapaRevisao = resultado.etapas.find(e => e.nivel === 'revisao');
+  elTempoRevisao.textContent = etapaRevisao ? formatarSegundos(etapaRevisao.tempo) : 'Não disponível';
+}
+
+// ===== 18. SORTEIO COM PREVIEW =====
+let seedPreviewAtual = null;
+
+function executarSorteioAvaliacao() {
+  const modoSelecionado = document.querySelector('input[name="modo-prova"]:checked')?.value || 'simulado';
+
+  if (modoSelecionado === 'sala') {
+    sincronizarNTP().then(ok => {
+      if (!ok) {
+        alert("❌ Não foi possível sincronizar com NTP. Verifique a conexão com a internet.");
+        return;
+      }
+      const resultado = calcularProvaSala();
+      if (!resultado.valido) {
+        alert(resultado.mensagem);
+        return;
+      }
+      abrirPreviewSorteio(modoSelecionado, resultado);
+    });
+  } else {
+    abrirPreviewSorteio(modoSelecionado, null);
+  }
+}
+
+function abrirPreviewSorteio(modo, resultadoSala) {
+  seedPreviewAtual = gerarSeedAleatorio();
+  document.getElementById('preview-seed').textContent = String(seedPreviewAtual).padStart(3, '0');
+  document.getElementById('modal-preview-sorteio').classList.remove('oculto');
+
+  document.getElementById('btn-resortear').onclick = () => {
+    seedPreviewAtual = gerarSeedAleatorio();
+    document.getElementById('preview-seed').textContent = String(seedPreviewAtual).padStart(3, '0');
+  };
+
+  document.getElementById('btn-digitar-seed').onclick = () => {
+    const input = prompt(`Digite o número da combinação (1 a ${TOTAL_COMBINACOES}):`);
+    if (input !== null) {
+      const num = parseInt(input, 10);
+      if (!isNaN(num) && num >= 1 && num <= TOTAL_COMBINACOES) {
+        seedPreviewAtual = num;
+        document.getElementById('preview-seed').textContent = String(num).padStart(3, '0');
+      } else {
+        alert(`Número inválido. Use um valor entre 1 e ${TOTAL_COMBINACOES}.`);
+      }
+    }
+  };
+
+  document.getElementById('btn-confirmar-inicio').onclick = () => {
+    document.getElementById('modal-preview-sorteio').classList.add('oculto');
+    iniciarProvaComSeed(seedPreviewAtual, modo, resultadoSala);
+  };
+}
+
+function iniciarProvaComSeed(seed, modo, resultadoSala) {
+  const sorteio = sortearComSeed(seed);
+  const av = ESTADO.avaliacao;
+  av.semente = seed;
+  av.questoesIds = [sorteio.facil.id, sorteio.medio.id, sorteio.dificil.id];
+  av.modoProva = modo;
+  av.tempoTotalGasto = 0;
+
+  if (modo === 'sala' && resultadoSala) {
+    etapasProvaAtual = resultadoSala.etapas;
+    fechamentoProvaTimestamp = agoraSincronizado().getTime() + resultadoSala.tempoTotal * 1000;
+  } else {
+    etapasProvaAtual = [
+      { nivel: 'facil', tempo: TEMPOS_AVALIACAO.facil },
+      { nivel: 'medio', tempo: TEMPOS_AVALIACAO.medio },
+      { nivel: 'dificil', tempo: TEMPOS_AVALIACAO.dificil },
+      { nivel: 'revisao', tempo: TEMPOS_AVALIACAO.revisao }
+    ];
+    fechamentoProvaTimestamp = null;
+  }
+
+  indiceEtapaAtual = 0;
+  tempoRestanteEtapa = etapasProvaAtual[0].tempo;
+  tempoMaximoEtapa = etapasProvaAtual[0].tempo;
+  av.etapaAtual = etapasProvaAtual[0].nivel;
+  av.tempoRestante = tempoRestanteEtapa;
+
+  salvarStorage();
+  renderizarPainelProvaSimulado();
+}
+
+// ===== 19. TEMPORIZADOR DA PROVA =====
 function iniciarTemporizadorAvaliacao() {
   if (timerAvaliacao) clearInterval(timerAvaliacao);
-
-  const av = ESTADO.avaliacao;
   atualizarInterfaceAvaliacao();
 
   timerAvaliacao = setInterval(() => {
-    if (av.tempoRestante > 0) {
-      av.tempoRestante--;
+    const av = ESTADO.avaliacao;
+
+    if (fechamentoProvaTimestamp && Date.now() + OFFSET_NTP_MS >= fechamentoProvaTimestamp) {
+      finalizarProvaPorSinal();
+      return;
+    }
+
+    if (tempoRestanteEtapa > 0) {
+      tempoRestanteEtapa--;
+      av.tempoRestante = tempoRestanteEtapa;
       av.tempoTotalGasto++;
-      atualizarVisorTempoAvaliacao(TEMPOS_AVALIACAO[av.etapaAtual] || 0);
+      atualizarVisorTempoAvaliacao();
+      salvarStorage();
     } else {
       avancarProximaEtapaAvaliacao();
     }
@@ -1033,42 +1357,59 @@ function iniciarTemporizadorAvaliacao() {
 }
 
 function avancarProximaEtapaAvaliacao() {
+  indiceEtapaAtual++;
   const av = ESTADO.avaliacao;
-  if (av.etapaAtual === 'facil') {
-    alert("Tempo da Questão Fácil encerrado! Avançando para a Questão Média.");
-    av.etapaAtual = 'medio';
-    av.tempoRestante = TEMPOS_AVALIACAO.medio;
-  } else if (av.etapaAtual === 'medio') {
-    alert("Tempo da Questão Média encerrado! Avançando para a Questão Difícil.");
-    av.etapaAtual = 'dificil';
-    av.tempoRestante = TEMPOS_AVALIACAO.dificil;
-  } else if (av.etapaAtual === 'dificil') {
-    alert("Tempo da Questão Difícil encerrado! Entrando na Revisão Geral (3 questões visíveis).");
-    av.etapaAtual = 'revisao';
-    av.tempoRestante = TEMPOS_AVALIACAO.revisao;
-  } else if (av.etapaAtual === 'revisao') {
+
+  if (indiceEtapaAtual >= etapasProvaAtual.length) {
     finalizarAvaliacaoDefinitiva();
     return;
   }
 
+  const etapa = etapasProvaAtual[indiceEtapaAtual];
+  av.etapaAtual = etapa.nivel;
+  tempoRestanteEtapa = etapa.tempo;
+  tempoMaximoEtapa = etapa.tempo;
+  av.tempoRestante = tempoRestanteEtapa;
+
   salvarStorage();
-  iniciarTemporizadorAvaliacao();
+  atualizarInterfaceAvaliacao();
+}
+
+function finalizarProvaPorSinal() {
+  if (timerAvaliacao) { clearInterval(timerAvaliacao); timerAvaliacao = null; }
+  ESTADO.avaliacao.etapaAtual = 'fim';
+  salvarStorage();
+  mostrarTelaFimDeProvaSala();
+}
+
+function mostrarTelaFimDeProvaSala() {
+  const pExec = document.getElementById('painel-execucao-prova');
+  const pFim = document.getElementById('painel-fim-prova');
+  if (pExec) pExec.classList.add('oculto');
+  if (pFim) {
+    pFim.classList.remove('oculto');
+    const titulo = pFim.querySelector('.titulo-fim-prova');
+    if (titulo) titulo.textContent = 'FIM DE PROVA';
+    const subtitulo = pFim.querySelector('p');
+    if (subtitulo) subtitulo.textContent = 'O tempo da aula terminou. Entregue sua prova ao professor.';
+    const btnGab = document.getElementById('btn-ver-gabarito-simulado');
+    if (btnGab) btnGab.style.display = 'none';
+    const btnNovo = document.getElementById('btn-novo-simulado');
+    if (btnNovo) btnNovo.style.display = 'none';
+  }
 }
 
 function adicionarTempoExtra(minutos) {
-  const av = ESTADO.avaliacao;
-  av.tempoRestante += minutos * 60;
+  tempoRestanteEtapa += minutos * 60;
+  tempoMaximoEtapa += minutos * 60;
+  ESTADO.avaliacao.tempoRestante = tempoRestanteEtapa;
   salvarStorage();
-  atualizarVisorTempoAvaliacao(TEMPOS_AVALIACAO[av.etapaAtual] || 0);
-  alert(`⏱️ +${minutos} minutos adicionados!`);
+  atualizarVisorTempoAvaliacao();
 }
 window.adicionarTempoExtra = adicionarTempoExtra;
 
 function finalizarAvaliacaoDefinitiva() {
-  if (timerAvaliacao) {
-    clearInterval(timerAvaliacao);
-    timerAvaliacao = null;
-  }
+  if (timerAvaliacao) { clearInterval(timerAvaliacao); timerAvaliacao = null; }
   ESTADO.avaliacao.etapaAtual = 'fim';
   salvarStorage();
   renderizarPainelProvaSimulado();
@@ -1082,65 +1423,59 @@ function atualizarInterfaceAvaliacao() {
   const container = document.getElementById('container-questao-ativa');
   const painelExtra = document.getElementById('controles-tempo-extra');
 
-  if (tagSemente) tagSemente.textContent = `Sorteio #${av.semente || '001'}`;
+  if (tagSemente) tagSemente.textContent = `Sorteio #${String(av.semente || 1).padStart(3, '0')}`;
   if (tagAluno) tagAluno.textContent = `Aluno: ${ESTADO.nomeAluno.trim() || 'Estudante'}`;
 
   const questoes = (av.questoesIds || []).map(id => obterQuestaoPorId(id)).filter(Boolean);
   container.innerHTML = '';
 
-  if (av.etapaAtual === 'facil') {
-    bannerEtapa.innerHTML = "🟢 <strong>ETAPA 1 DE 3 — QUESTÃO FÁCIL</strong> (Foco Exclusivo &bull; 8 minutos)";
-    painelExtra.classList.add('oculto');
-    renderizarQuestaoCardSimulado(questoes[0], container, 1, "Fácil (8 min)");
-  } else if (av.etapaAtual === 'medio') {
-    bannerEtapa.innerHTML = "🟡 <strong>ETAPA 2 DE 3 — QUESTÃO MÉDIA</strong> (Foco Exclusivo &bull; 10 minutos)";
-    painelExtra.classList.add('oculto');
-    renderizarQuestaoCardSimulado(questoes[1], container, 2, "Média (10 min)");
-  } else if (av.etapaAtual === 'dificil') {
-    bannerEtapa.innerHTML = "🔴 <strong>ETAPA 3 DE 3 — QUESTÃO DIFÍCIL</strong> (Foco Exclusivo &bull; 12 minutos)";
-    painelExtra.classList.add('oculto');
-    renderizarQuestaoCardSimulado(questoes[2], container, 3, "Difícil (12 min)");
-  } else if (av.etapaAtual === 'revisao') {
-    bannerEtapa.innerHTML = "🟣 <strong>ETAPA 4 — REVISÃO GERAL</strong> (Todas as 3 questões visíveis &bull; 15 minutos)";
-    painelExtra.classList.remove('oculto');
+  const etapaAtual = etapasProvaAtual[indiceEtapaAtual];
+  const nivelAtual = etapaAtual ? etapaAtual.nivel : 'facil';
+
+  container.className = '';
+  if (nivelAtual === 'facil') container.classList.add('etapa-facil');
+  else if (nivelAtual === 'medio') container.classList.add('etapa-medio');
+  else if (nivelAtual === 'dificil') container.classList.add('etapa-dificil');
+
+  const banners = {
+    facil: `🟢 <strong>ETAPA 1 — QUESTÃO FÁCIL</strong> (Foco Exclusivo • ${formatarSegundos(tempoMaximoEtapa)})`,
+    medio: `🟡 <strong>ETAPA 2 — QUESTÃO MÉDIA</strong> (Foco Exclusivo • ${formatarSegundos(tempoMaximoEtapa)})`,
+    dificil: `🔴 <strong>ETAPA 3 — QUESTÃO DIFÍCIL</strong> (Foco Exclusivo • ${formatarSegundos(tempoMaximoEtapa)})`,
+    revisao: `🟣 <strong>ETAPA FINAL — REVISÃO GERAL</strong> (Todas as questões visíveis • ${formatarSegundos(tempoMaximoEtapa)})`
+  };
+
+  if (bannerEtapa) bannerEtapa.innerHTML = banners[nivelAtual] || banners.facil;
+
+  if (nivelAtual === 'revisao') {
+    if (painelExtra) painelExtra.classList.remove('oculto');
     const rotulos = ["Fácil", "Média", "Difícil"];
     questoes.forEach((q, idx) => {
       renderizarQuestaoCardSimulado(q, container, idx + 1, rotulos[idx]);
     });
+  } else {
+    if (painelExtra) painelExtra.classList.add('oculto');
+    const idxQuestao = nivelAtual === 'facil' ? 0 : (nivelAtual === 'medio' ? 1 : 2);
+    const labels = { facil: 'Fácil', medio: 'Média', dificil: 'Difícil' };
+    renderizarQuestaoCardSimulado(questoes[idxQuestao], container, idxQuestao + 1, labels[nivelAtual]);
   }
 
   garantirRenderizacaoLatex(container);
+  atualizarVisorTempoAvaliacao();
 }
 
 function renderizarQuestaoCardSimulado(q, container, num, label) {
   if (!q) return;
   const card = document.createElement('article');
   card.className = "questao-card";
-  card.innerHTML = `
-    <div class="card-cabecalho">
-      <span class="num-q">${num}</span>
-      <span class="tag-nivel ${q.tipo}">${label}</span>
-      <span style="font-family:'Fira Code', monospace; color:#868e96; font-size:0.95rem;">ID: ${q.id}</span>
-    </div>
-    <div class="enunciado" style="font-size: 1.35rem; margin: 16px 0;">${q.enunciado}</div>
-    <div class="postit">
-      ✍️ <strong>Resolução no Caderno:</strong> Estruture: <strong>I. Dados</strong> &bull; <strong>II. Equação</strong> &bull; <strong>III. Resolução</strong>.
-    </div>
-  `;
+  card.innerHTML = `<div class="card-cabecalho"><span class="num-q">${num}</span><span class="tag-nivel ${q.tipo}">${label}</span><span style="font-family:'Fira Code', monospace; color:#868e96; font-size:0.95rem;">ID: ${q.id}</span></div><div class="enunciado" style="font-size: 1.35rem; margin: 16px 0;">${q.enunciado}</div><div class="postit">✍️ <strong>Resolução no Caderno:</strong> Estruture: <strong>I. Dados</strong> &bull; <strong>II. Equação</strong> &bull; <strong>III. Resolução</strong>.</div>`;
   container.appendChild(card);
 }
 
-function atualizarVisorTempoAvaliacao(maxSegundos) {
+function atualizarVisorTempoAvaliacao() {
   const av = ESTADO.avaliacao;
-  const visor = document.getElementById('visor-grande-tempo');
   const barra = document.getElementById('barra-tempo-preenchimento');
-
-  const m = Math.floor(av.tempoRestante / 60);
-  const s = av.tempoRestante % 60;
-  if (visor) visor.textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-
-  if (barra && maxSegundos > 0) {
-    const pct = Math.max(0, (av.tempoRestante / maxSegundos) * 100);
+  if (barra && tempoMaximoEtapa > 0) {
+    const pct = Math.max(0, (tempoRestanteEtapa / tempoMaximoEtapa) * 100);
     barra.style.width = `${pct}%`;
   }
 }
@@ -1154,37 +1489,173 @@ function exibirFimDeProva() {
 
   if (folhaNome) folhaNome.textContent = ESTADO.nomeAluno.trim() || 'Estudante';
   if (folhaData) folhaData.textContent = new Date().toLocaleDateString('pt-BR');
-
   if (btnNovo) {
+    btnNovo.style.display = '';
     btnNovo.onclick = () => {
       ESTADO.avaliacao.etapaAtual = 'pre_prova';
       salvarStorage();
       renderizarPainelProvaSimulado();
     };
   }
-
   if (btnGab) {
+    btnGab.style.display = '';
     btnGab.onclick = () => {
       if (!boxGab) return;
       boxGab.classList.toggle('oculto');
       const questoes = (ESTADO.avaliacao.questoesIds || []).map(id => obterQuestaoPorId(id)).filter(Boolean);
-      boxGab.innerHTML = `
-        <h3>📖 Resolução Comentada do Simulado</h3>
-        ${questoes.map((q, i) => `
-          <div style="border-top:1px dashed #ced4da; padding:12px 0;">
-            <h4>Questão ${i + 1} (${q.id}) - ${q.nivelTexto}</h4>
-            <div><strong>I. Dados:</strong> ${q.gabarito.fase1.join(' &bull; ')}</div>
-            <div><strong>II. Equação:</strong> ${q.gabarito.fase2}</div>
-            <div><strong>III. Resolução:</strong> ${q.gabarito.fase3.join(' ➔ ')}</div>
-          </div>
-        `).join('')}
-      `;
+      boxGab.innerHTML = `<h3>📖 Resolução Comentada do Simulado</h3>${questoes.map((q, i) => `<div style="border-top:1px dashed #ced4da; padding:12px 0;"><h4>Questão ${i + 1} (${q.id}) - ${q.nivelTexto}</h4><div><strong>I. Dados:</strong> ${q.gabarito.fase1.join(' • ')}</div><div><strong>II. Equação:</strong> ${q.gabarito.fase2}</div><div><strong>III. Resolução:</strong> ${q.gabarito.fase3.join(' ➔ ')}</div></div>`).join('')}`;
       garantirRenderizacaoLatex(boxGab);
     };
   }
 }
 
-// ===== NAVEGAÇÃO DE ABAS =====
+// ===== GRÁFICOS E HISTÓRICO (resgatados da V5) =====
+function desenharGraficoFases(medF1, medF2, medF3) {
+  const canvas = document.getElementById('grafico-fases');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+  const w = canvas.width, h = canvas.height;
+  ctx.clearRect(0, 0, w, h);
+  const dados = [
+    { label: 'Fase I (Dados)', aluno: medF1, meta: 30 },
+    { label: 'Fase II (Eq.)', aluno: medF2, meta: 20 },
+    { label: 'Fase III (Res.)', aluno: medF3, meta: 80 }
+  ];
+  const barWidth = 32, startX = 40, baseY = 210, scale = 1.3;
+  ctx.strokeStyle = '#495057';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(30, baseY);
+  ctx.lineTo(370, baseY);
+  ctx.stroke();
+  dados.forEach((d, i) => {
+    const x = startX + i * 110;
+    const hAluno = Math.min(d.aluno * scale, 170);
+    ctx.fillStyle = '#173fa6';
+    ctx.fillRect(x, baseY - hAluno, barWidth, hAluno);
+    ctx.font = 'bold 12px monospace';
+    ctx.fillStyle = '#21315e';
+    ctx.fillText(`${d.aluno}s`, x + 4, baseY - hAluno - 5);
+    const hMeta = d.meta * scale;
+    ctx.fillStyle = '#fab005';
+    ctx.fillRect(x + barWidth + 4, baseY - hMeta, barWidth, hMeta);
+    ctx.fillStyle = '#d9480f';
+    ctx.fillText(`${d.meta}s`, x + barWidth + 8, baseY - hMeta - 5);
+    ctx.fillStyle = '#21315e';
+    ctx.font = "12px 'Patrick Hand', sans-serif";
+    ctx.fillText(d.label, x, baseY + 20);
+  });
+  ctx.fillStyle = '#173fa6';
+  ctx.fillRect(80, 245, 14, 10);
+  ctx.fillStyle = '#000';
+  ctx.font = '12px sans-serif';
+  ctx.fillText('Seu Tempo', 100, 254);
+  ctx.fillStyle = '#fab005';
+  ctx.fillRect(200, 245, 14, 10);
+  ctx.fillStyle = '#000';
+  ctx.fillText('Meta Vestibular', 220, 254);
+}
+
+function desenharGraficoNiveis() {
+  const canvas = document.getElementById('grafico-niveis');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+  const w = canvas.width, h = canvas.height;
+  ctx.clearRect(0, 0, w, h);
+  let somaF = 0, countF = 0, somaI = 0, countI = 0, somaD = 0, countD = 0;
+  for (let k = 1; k <= 6; k++) {
+    (BANCO_KITS[k] || []).forEach(q => {
+      const resp = ESTADO.respostas[q.id];
+      if (resp && resp.concluida) {
+        if (q.tipo === 'facil') { somaF += resp.tempoTotal; countF++; }
+        if (q.tipo === 'medio') { somaI += resp.tempoTotal; countI++; }
+        if (q.tipo === 'dificil') { somaD += resp.tempoTotal; countD++; }
+      }
+    });
+  }
+  const medF = countF > 0 ? Math.round(somaF / countF) : 0;
+  const medI = countI > 0 ? Math.round(somaI / countI) : 0;
+  const medD = countD > 0 ? Math.round(somaD / countD) : 0;
+  const niveis = [
+    { label: 'Fáceis (2F)', val: medF, meta: 60, cor: '#2f9e44', temDados: countF > 0 },
+    { label: 'Médios (2I)', val: medI, meta: 120, cor: '#f59f00', temDados: countI > 0 },
+    { label: 'Difíceis (1D)', val: medD, meta: 180, cor: '#e03131', temDados: countD > 0 }
+  ];
+  const barWidth = 32, startX = 40, baseY = 210, scale = 0.85;
+  ctx.strokeStyle = '#495057';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(30, baseY);
+  ctx.lineTo(370, baseY);
+  ctx.stroke();
+  niveis.forEach((n, i) => {
+    const x = startX + i * 110;
+    const hReal = Math.min(n.val * scale, 170);
+    ctx.fillStyle = n.temDados ? n.cor : '#ced4da';
+    ctx.fillRect(x, baseY - hReal, barWidth, hReal);
+    ctx.font = 'bold 12px monospace';
+    ctx.fillStyle = '#21315e';
+    ctx.fillText(`${n.val}s`, x + 4, baseY - hReal - 5);
+    const hMeta = n.meta * scale;
+    ctx.fillStyle = '#e9ecef';
+    ctx.strokeStyle = '#adb5bd';
+    ctx.lineWidth = 1;
+    ctx.fillRect(x + barWidth + 4, baseY - hMeta, barWidth, hMeta);
+    ctx.strokeRect(x + barWidth + 4, baseY - hMeta, barWidth, hMeta);
+    ctx.fillStyle = '#495057';
+    ctx.fillText(`${n.meta}s`, x + barWidth + 8, baseY - hMeta - 5);
+    ctx.fillStyle = '#21315e';
+    ctx.font = "12px 'Patrick Hand', sans-serif";
+    ctx.fillText(n.label, x, baseY + 20);
+  });
+  ctx.fillStyle = '#2f9e44';
+  ctx.fillRect(70, 245, 14, 10);
+  ctx.fillStyle = '#000';
+  ctx.font = '12px sans-serif';
+  ctx.fillText('Tempo Obtido', 90, 254);
+  ctx.fillStyle = '#adb5bd';
+  ctx.fillRect(200, 245, 14, 10);
+  ctx.fillStyle = '#000';
+  ctx.fillText('Meta Vestibular', 220, 254);
+}
+
+function renderizarTabelaHistorico() {
+  const container = document.getElementById('tabela-tentativas-container');
+  if (!container) return;
+  const hist = ESTADO.historico || [];
+  if (hist.length === 0) {
+    container.innerHTML = `<p style="font-style:italic; color:#868e96;">Nenhuma tentativa registrada até o momento.</p>`;
+    return;
+  }
+  let html = `<table class="tabela-historico"> <thead> <tr> <th>Questão</th> <th>Horário</th> <th>Fase I (Dados)</th> <th>Fase II (Eq.)</th> <th>Fase III (Res.)</th> <th>Tempo Total</th> <th>Ação</th> </tr> </thead> <tbody>`;
+  hist.slice().reverse().forEach(item => {
+    html += `<tr> <td><strong>${item.questId}</strong></td> <td>${item.data || '--'}</td> <td>${item.f1 || 0}s</td> <td>${item.f2 || 0}s</td> <td>${item.f3 || 0}s</td> <td><strong>${formatarSegundos(item.total || 0)}</strong></td> <td> <button type="button" class="btn-excluir-tentativa" onclick="window.dispatchEvent(new CustomEvent('excluirTentativa', {detail: {id: '${item.id}'}}))">Excluir</button> </td> </tr>`;
+  });
+  html += `</tbody></table>`;
+  container.innerHTML = html;
+}
+
+// Recupera histórico de conclusões feitas antes deste patch
+function recomporHistoricoAusente() {
+  if (!ESTADO.historico) ESTADO.historico = [];
+  if (ESTADO.historico.length > 0) return;
+  Object.entries(ESTADO.respostas || {}).forEach(([qid, r]) => {
+    if (r && r.concluida) {
+      ESTADO.historico.push({
+        id: 'rec-' + qid,
+        questId: qid,
+        data: '(registro recuperado)',
+        f1: r.fase1_t || 0, f2: r.fase2_t || 0, f3: r.fase3_t || 0,
+        total: r.tempoTotal || 0
+      });
+    }
+  });
+  if (ESTADO.historico.length) salvarStorage();
+}
+
+// ===== 20. NAVEGAÇÃO DE ABAS =====
 function mudarAba(kit) {
   ESTADO.kitAtivo = kit;
   salvarStorage();
@@ -1193,11 +1664,11 @@ function mudarAba(kit) {
 }
 window.mudarAba = mudarAba;
 
-// ===== INICIALIZAÇÃO DO DOM =====
+// ===== 21. INICIALIZAÇÃO DO DOM =====
 document.addEventListener('DOMContentLoaded', () => {
   carregarStorage();
+  iniciarControlesZoom();
 
-  // 1. Controle da Barra Superior e Edição de Nome
   const btnEditarNome = document.getElementById('btn-editar-nome-topo');
   const gavetaPerfil = document.getElementById('gaveta-perfil');
   const inputNome = document.getElementById('input-nome-aluno-topo');
@@ -1206,7 +1677,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnOcultarTopo = document.getElementById('btn-ocultar-barra-topo');
   const btnReabrirTopo = document.getElementById('btn-reabrir-topo');
 
-  // Abre gaveta e foca o cursor no input ao clicar em "Editar Nome"
   if (btnEditarNome && gavetaPerfil) {
     btnEditarNome.addEventListener('click', () => {
       gavetaPerfil.classList.toggle('oculto');
@@ -1226,16 +1696,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (inputNome) inputNome.addEventListener('input', salvarIdentificacao);
   if (chkAcordo) chkAcordo.addEventListener('change', salvarIdentificacao);
-
   if (btnSalvarPerfil) {
     btnSalvarPerfil.addEventListener('click', () => {
       salvarIdentificacao();
       if (gavetaPerfil) gavetaPerfil.classList.add('oculto');
-      alert("✓ Identificação gravada!");
     });
   }
 
-  // Ocultar / Reabrir Barra Superior
   if (btnOcultarTopo) {
     btnOcultarTopo.addEventListener('click', () => {
       ESTADO.barraRecolhida = true;
@@ -1251,7 +1718,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 2. Navegação entre Abas
+  window.addEventListener('excluirTentativa', (e) => {
+    if (confirm('Deseja apagar esta medição do histórico?')) {
+      ESTADO.historico = (ESTADO.historico || []).filter(t => t.id !== e.detail.id);
+      salvarStorage();
+      renderizarTabelaHistorico();
+    }
+  });
+  recomporHistoricoAusente();
+
   document.querySelectorAll('.btn-aba').forEach(btn => {
     btn.addEventListener('click', () => {
       const kit = btn.dataset.kit;
@@ -1263,7 +1738,18 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // 3. Quadro de Equações Sanfonado
+  // Fechar modal de preview do sorteio (X ou clique no fundo escuro)
+  const modalPreview = document.getElementById('modal-preview-sorteio');
+  const btnFecharPreview = document.getElementById('btn-fechar-preview');
+  if (btnFecharPreview && modalPreview) {
+    btnFecharPreview.addEventListener('click', () => modalPreview.classList.add('oculto'));
+  }
+  if (modalPreview) {
+    modalPreview.addEventListener('click', (e) => {
+      if (e.target === modalPreview) modalPreview.classList.add('oculto');
+    });
+  }
+
   const gatilhoForm = document.getElementById('gatilho-formulas');
   const painelForm = document.getElementById('painel-equacoes');
   const setaForm = document.getElementById('seta-form');
@@ -1274,7 +1760,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 4. Modal de Equações Flutuante (Funciona em qualquer aba)
   const btnFlutuante = document.getElementById('btn-flutuante-equacoes');
   const overlayEq = document.getElementById('overlay-equacoes');
   const btnFecharEq = document.getElementById('btn-fechar-equacoes');
@@ -1285,7 +1770,6 @@ document.addEventListener('DOMContentLoaded', () => {
     btnFecharEq.addEventListener('click', () => overlayEq.classList.add('oculto'));
   }
 
-  // 5. Botões do Simulado
   const btnSortear = document.getElementById('btn-iniciar-avaliacao-oficial');
   if (btnSortear) btnSortear.addEventListener('click', executarSorteioAvaliacao);
 
@@ -1297,8 +1781,15 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+  const btnEncerrarAntecipado2 = document.getElementById('btn-encerrar-antecipado-2');
+  if (btnEncerrarAntecipado2) {
+    btnEncerrarAntecipado2.addEventListener('click', () => {
+      if (confirm("Deseja realmente entregar e finalizar a avaliação agora?")) {
+        finalizarAvaliacaoDefinitiva();
+      }
+    });
+  }
 
-  // 6. Acesso Professor (Senha FÍSICA com acento rigorosamente tratada)
   const btnProf = document.getElementById('btn-professor');
   if (btnProf) {
     btnProf.addEventListener('click', () => {
@@ -1317,6 +1808,5 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Render inicial completo
   renderizarTudo();
 });

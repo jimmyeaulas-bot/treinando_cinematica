@@ -4,292 +4,328 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Treinamento de Cinemática — Algoritmo Cognitivo (Prof. André)</title>
-
-  <!-- Fontes -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Patrick+Hand&family=Fira+Code:wght@500;700&display=swap" rel="stylesheet" />
-
-  <!-- KaTeX CSS -->
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Patrick+Hand&family=Fira+Code:wght@400;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" />
-
-  <!-- CSS principal -->
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-  <!-- ===== BOTÃO DISCRETO PARA REABRIR O TOPO QUANDO OCULTO ===== -->
-  <button type="button" id="btn-reabrir-topo" class="btn-reabrir-topo oculto" title="Exibir menu e progresso">
-    👁️ Mostrar Painel do Aluno (<span id="reabrir-pct-mini">0%</span>)
-  </button>
-
-  <!-- ===== BARRA SUPERIOR RETRÁTIL & OCULTÁVEL ===== -->
-  <aside id="barra-topo-principal" class="barra-superior-aluno" aria-label="Painel de Identificação e Progresso">
+  <!-- ===== BARRA SUPERIOR RETRÁTIL ===== -->
+  <div class="barra-superior-aluno" id="barra-topo-principal">
     <div class="container-barra-topo">
       <div class="resumo-topo-esquerda">
-        <span class="icone-usuario">👤</span>
-        <strong id="rotulo-nome-topo" class="nome-aluno-destaque">Estudante</strong>
-        <button type="button" id="btn-editar-nome-topo" class="btn-editar-nome" title="Alterar seu nome completo">
-          ✏️ Editar Nome
-        </button>
+        <span class="nome-aluno-destaque" id="rotulo-nome-topo">Estudante</span>
+        <button type="button" class="btn-editar-nome" id="btn-editar-nome-topo">✏️ Editar Nome</button>
         <span class="badge-acordo" id="status-acordo-tag">⚠️ Termo Pendente</span>
       </div>
-
-      <!-- Barra Percentual Global -->
       <div class="area-progresso-topo">
         <div class="info-progresso-topo">
-          <span>Progresso Geral:</span>
-          <strong id="texto-percentual-geral">0%</strong>
+          <span>Progresso Geral: <strong id="texto-percentual-geral">0%</strong></span>
           <span class="fracao-questoes" id="texto-fracao-geral">(0/30 questões)</span>
         </div>
         <div class="trilha-progresso-geral">
-          <div class="preenchimento-progresso-geral" id="barra-progresso-fill" style="width: 0%;"></div>
+          <div class="preenchimento-progresso-geral" id="barra-progresso-fill" style="width:0%"></div>
         </div>
       </div>
-
       <div class="acoes-topo-direita">
-        <button type="button" id="btn-ocultar-barra-topo" class="btn-ocultar-topo" title="Ocultar para maximizar espaço de tela">
-          🔼 Ocultar Barra
-        </button>
-        <button type="button" id="btn-professor" class="btn-professor" title="Acesso do Professor (Senha: FÍSICA)">🔒</button>
+        <!-- BOTÕES DE ZOOM -->
+        <div class="controles-zoom" id="controles-zoom">
+          <button type="button" class="btn-zoom" id="btn-zoom-out" title="Reduzir fonte">A−</button>
+          <span class="zoom-indicador" id="zoom-indicador">150%</span>
+          <button type="button" class="btn-zoom" id="btn-zoom-in" title="Ampliar fonte">A+</button>
+        </div>
+        <button type="button" class="btn-ocultar-topo" id="btn-ocultar-barra-topo">🔼 Ocultar Barra</button>
       </div>
     </div>
-
-    <!-- Gaveta de Edição de Nome e Aceite -->
-    <div id="gaveta-perfil" class="gaveta-conteudo oculto">
+    <!-- Gaveta de edição -->
+    <div class="gaveta-conteudo oculto" id="gaveta-perfil">
       <div class="card-gaveta-interno">
-        <div class="campo-gaveta">
-          <label for="input-nome-aluno-topo"><strong>Seu Nome Completo (usado no Certificado e Prova):</strong></label>
-          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-            <input type="text" id="input-nome-aluno-topo" placeholder="Digite seu nome completo aqui..." autocomplete="name" />
-            <button type="button" id="btn-salvar-perfil" class="btn-acao pequeno">Salvar Nome</button>
-          </div>
+        <div class="campo-gaveta" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+          <label for="input-nome-aluno-topo" style="font-weight:bold;">🔒 Seu Nome Completo (usado no Certificado e Prova):</label>
+          <input type="text" id="input-nome-aluno-topo" placeholder="Digite seu nome completo" />
+          <button type="button" class="btn-acao pequeno" id="btn-salvar-perfil">Salvar Nome</button>
         </div>
-        
         <label class="check-acordo-gaveta">
           <input type="checkbox" id="chk-acordo-topo" />
-          <span>Comprometo-me a registrar meus tempos com honestidade acadêmica e seguir o Algoritmo das 3 Fases.</span>
+          Comprometo-me a registrar meus tempos com honestidade acadêmica e seguir o Algoritmo das 3 Fases.
         </label>
       </div>
     </div>
-  </aside>
-
-  <!-- ===== MODAL OFICIAL DE EQUAÇÕES (ACESSÍVEL DE QUALQUER TELA) ===== -->
-  <div id="overlay-equacoes" class="modal-overlay oculto">
-    <div class="modal-card" style="max-width: 740px;">
-      <div class="tape"></div>
-      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px dashed #ced4da; padding-bottom: 8px;">
-        <h2 style="margin: 0;">📐 Quadro Oficial de Equações de Cinemática</h2>
-        <button type="button" id="btn-fechar-equacoes" class="btn-fechar-modal" title="Fechar Janela">&times;</button>
-      </div>
-      <div id="painel-equacoes-overlay" class="grade-equacoes"></div>
-    </div>
   </div>
 
-  <!-- ===== BOTÃO FLUTUANTE DE EQUAÇÕES (DISPONÍVEL SEMPRE) ===== -->
-  <button type="button" id="btn-flutuante-equacoes" class="btn-flutuante" title="Abrir formulário de equações em janela modal">
-    📐 Fórmulas (Quadro)
-  </button>
+  <!-- Botão para reabrir topo -->
+  <button type="button" class="btn-reabrir-topo oculto" id="btn-reabrir-topo">👁️ Mostrar Painel do Aluno (<span id="reabrir-pct-mini">0%</span>)</button>
 
   <!-- ===== HEADER ===== -->
   <header class="topo">
     <div class="meta-header">
-      <span class="tag-prof">Prof. André &bull; Cinemática Escalar</span>
+      <div class="tag-prof">Prof. André • Cinemática Escalar</div>
       <span class="prog" id="status-geral">0 de 6 Kits Concluídos</span>
+      <button type="button" class="btn-professor" id="btn-professor" title="Acesso do Professor">👤</button>
     </div>
     <h1>Caderno de Alta Performance: Cinemática</h1>
-    <p class="sub">Metodologia de Fixação Sináptica: <strong>I. Dados</strong> ➔ <strong>II. Equação</strong> ➔ <strong>III. Resolução</strong></p>
-
-    <nav aria-label="Navegação entre Kits e Prova/Simulado">
-      <ol id="abas-kits">
-        <li><button type="button" class="btn-aba ativa" data-kit="1">Kit 1</button></li>
-        <li><button type="button" class="btn-aba" data-kit="2">Kit 2</button></li>
-        <li><button type="button" class="btn-aba" data-kit="3">Kit 3</button></li>
-        <li><button type="button" class="btn-aba" data-kit="4">Kit 4</button></li>
-        <li><button type="button" class="btn-aba" data-kit="5">Kit 5</button></li>
-        <li><button type="button" class="btn-aba" data-kit="6">Kit 6</button></li>
-        <li><button type="button" class="btn-aba btn-painel-final" data-kit="cert">🏅 Métricas</button></li>
-        <li><button type="button" class="btn-aba btn-prova-final bloqueada" data-kit="prova" id="btn-aba-prova" title="Conclua os 6 kits para desbloquear">🔒 PROVA</button></li>
-      </ol>
-    </nav>
+    <p style="font-size:1.15rem; color:#495057;">Metodologia de Fixação Sináptica: I. Dados ➔ II. Equação ➔ III. Resolução</p>
   </header>
 
-  <!-- ===== MAIN ===== -->
-  <main id="conteudo-principal">
+  <!-- ===== NAVEGAÇÃO POR ABAS ===== -->
+  <nav aria-label="Abas de conteúdo">
+    <ol>
+      <li><button type="button" class="btn-aba ativa" data-kit="1">Kit 1</button></li>
+      <li><button type="button" class="btn-aba" data-kit="2">Kit 2</button></li>
+      <li><button type="button" class="btn-aba" data-kit="3">Kit 3</button></li>
+      <li><button type="button" class="btn-aba" data-kit="4">Kit 4</button></li>
+      <li><button type="button" class="btn-aba" data-kit="5">Kit 5</button></li>
+      <li><button type="button" class="btn-aba" data-kit="6">Kit 6</button></li>
+      <li><button type="button" class="btn-aba btn-painel-final" data-kit="cert">🏅 Métricas</button></li>
+      <li><button type="button" class="btn-aba btn-prova-final" data-kit="prova" id="btn-aba-prova">🔒 SIMULADO (0/6 Kits)</button></li>
+    </ol>
+  </nav>
 
-    <!-- Quadro Sanfonado Integrado de Fórmulas -->
-    <section class="card resumo-formulas" id="secao-formulas">
+  <main>
+    <!-- ===== QUADRO DE FÓRMULAS SANFONADO ===== -->
+    <section class="card" id="secao-formulas">
       <div class="tape"></div>
-      <div class="tape t2"></div>
       <div class="cabecalho-sanfona" id="gatilho-formulas">
-        <h2>Banco de Equações Disponíveis (Quadro de Consulta)</h2>
-        <span class="seta-sanfona" id="seta-form">▼</span>
+        <h2 style="margin:0;">📐 Quadro Oficial de Equações de Cinemática</h2>
+        <span id="seta-form" style="font-size:1.5rem;">▼</span>
       </div>
       <div class="grade-equacoes" id="painel-equacoes"></div>
     </section>
 
-    <!-- Mural de Conquistas -->
-    <section class="card mural-emblemas" id="secao-mural">
-      <div class="mural-topo">
-        <h3>Mural de Conquistas (Desbloqueado por quantidade de kits concluídos, sem ordem rígida)</h3>
-      </div>
-      <div class="grade-medalhas" id="grade-medalhas"></div>
-    </section>
-
-    <!-- Container dos Kits de Exercícios -->
+    <!-- ===== CONTEÚDO DO KIT ATIVO ===== -->
     <section id="conteudo-kit"></section>
 
-    <!-- ===== SEÇÃO DE MÉTRICAS E CERTIFICADO ===== -->
+    <!-- ===== PAINEL DE MÉTRICAS / CERTIFICADO ===== -->
     <section id="secao-certificado" class="oculto">
-      <div class="card no-print">
-        <h3>Painel de Domínio dos Kits</h3>
+      <div class="card">
+        <div class="tape t2"></div>
+        <h2>Mural de Conquistas (Desbloqueado por quantidade de kits concluídos, sem ordem rígida)</h2>
+        <div class="grade-medalhas" id="grade-medalhas"></div>
+      </div>
+
+      <div class="card">
+        <h2>Painel de Domínio dos Kits</h2>
         <p>Conclua as 5 questões de qualquer kit para desbloquear emblemas e gabaritos didáticos detalhados.</p>
         <div class="grade-kits-metricas" id="grade-kits-status"></div>
       </div>
-
-      <div class="card area-diploma" id="area-impressao">
-        <div class="tape"></div>
-        <div class="tape t2"></div>
-        <div class="diploma-borda">
-          <p class="diploma-sub">CERTIFICADO DE CONSOLIDAÇÃO COGNITIVA</p>
-          <h2 class="diploma-titulo">Maestria em Cinemática Escalar</h2>
-          <p class="diploma-texto">Certificamos que o(a) estudante</p>
-          <div class="campo-nome-aluno">
-            <span id="diploma-nome-exibicao">Estudante</span>
+	  
+	        <div class="card">
+        <h2>📊 Métricas de Performance (Gráficos)</h2>
+        <p>Comparativo entre o seu tempo médio e a meta vestibular, por fase do algoritmo e por nível de questão.</p>
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px;">
+          <div>
+            <h3 style="text-align:center;">Tempo médio por Fase</h3>
+            <canvas id="grafico-fases" width="380" height="270"
+                    style="width:100%; background:#fff; border:2px solid var(--ink); border-radius:12px;"></canvas>
           </div>
-          <p class="diploma-texto">
-            completou o treinamento através do <strong>Algoritmo das Três Fases</strong> 
-            (Dados &bull; Equações &bull; Resolução), demonstrando prontidão, raciocínio ordenado e precisão analítica.
-          </p>
-          <div class="diploma-dados-metricas" id="resumo-diploma"></div>
-          <div class="diploma-medalhas" id="medalhas-diploma"></div>
-          <div class="diploma-rodape">
-            <span>Data de Emissão: <strong id="data-cert">--/--/----</strong></span>
-            <span class="prof-assinatura">Prof. André</span>
+          <div>
+            <h3 style="text-align:center;">Tempo médio por Nível</h3>
+            <canvas id="grafico-niveis" width="380" height="270"
+                    style="width:100%; background:#fff; border:2px solid var(--ink); border-radius:12px;"></canvas>
           </div>
         </div>
-        <div class="acoes-diploma no-print">
-          <button type="button" class="btn-acao grande" onclick="window.print()">🖨️ Imprimir Certificado / Salvar em PDF</button>
+      </div>
+
+      <div class="card">
+        <h2>🗂️ Histórico de Tentativas</h2>
+        <div id="tabela-tentativas-container"></div>
+      </div>
+
+      <div class="card area-diploma">
+        <div class="diploma-borda">
+          <div class="diploma-titulo">CERTIFICADO DE CONSOLIDAÇÃO COGNITIVA</div>
+          <h3 style="font-size:1.6rem; color:#495057;">Maestria em Cinemática Escalar</h3>
+          <p style="font-size:1.2rem;">Certificamos que o(a) estudante</p>
+          <div id="diploma-nome-exibicao">Estudante</div>
+          <p style="font-size:1.1rem; max-width:600px; margin:12px auto;">
+            completou o treinamento através do Algoritmo das Três Fases 
+            (Dados • Equações • Resolução), demonstrando prontidão, raciocínio ordenado e precisão analítica.
+          </p>
+          <div id="medalhas-diploma" style="margin:16px 0;"></div>
+          <div id="resumo-diploma"></div>
+          <p style="margin-top:16px; font-size:1rem; color:#495057;">Data de Emissão: <span id="data-cert">--/--/----</span></p>
+          <p style="font-family:'Caveat',cursive; font-size:1.8rem; color:var(--ink);">Prof. André</p>
+          <button type="button" class="btn-acao" onclick="window.print()">🖨️ Imprimir Certificado / Salvar em PDF</button>
         </div>
       </div>
     </section>
 
-    <!-- ===== SEÇÃO DO SIMULADO / PROVA ===== -->
+    <!-- ===== SEÇÃO DE PROVA / SIMULADO ===== -->
     <section id="secao-prova" class="oculto">
-      
-      <!-- Aviso de Bloqueio -->
-      <div id="painel-bloqueio-prova" class="card card-pre-prova oculto">
-        <div class="tape"></div>
+      <!-- Painel de bloqueio -->
+      <div class="card card-pre-prova" id="painel-bloqueio-prova">
         <h2>🔒 Avaliação Bloqueada</h2>
-        <p class="sub-avaliacao" style="color: var(--red); font-size: 1.3rem;">
-          Você precisa concluir todos os <strong>6 Kits (30 questões)</strong> para destravar o Simulado Oficial.
-        </p>
-        <div class="postit">
-          Atualmente você concluiu <strong id="qtd-kits-concluidos-aviso">0</strong> de 6 kits.
-        </div>
+        <p>Você precisa concluir todos os 6 Kits (30 questões) para destravar o Simulado Oficial.</p>
+        <p>Atualmente você concluiu <strong id="qtd-kits-concluidos-aviso">0</strong> de 6 kits.</p>
       </div>
 
-      <!-- Pré-Prova -->
-      <div id="painel-pre-prova" class="card card-pre-prova">
-        <div class="tape"></div>
-        <div class="tape t2"></div>
-        <h2 id="titulo-modo-avaliacao">🎯 Simulado Oficial de Cinemática</h2>
-        <p class="sub-avaliacao">Sorteio 100% aleatório de 3 questões (1 Fácil, 1 Média e 1 Difícil).</p>
+      <!-- Painel de pré-prova (sorteio) -->
+      <div class="card card-pre-prova oculto" id="painel-pre-prova">
+        <h2>🎯 Simulado Oficial de Cinemática</h2>
+        <p>Sorteio 100% aleatório de 3 questões (1 Fácil, 1 Média e 1 Difícil).</p>
+        
+        <!-- SELETOR DE MODO -->
+        <div class="seletor-modo-prova">
+          <h3>📋 Tipo de Aplicação</h3>
+          <label class="opcao-modo">
+            <input type="radio" name="modo-prova" value="simulado" checked />
+            <span>🏠 Simulado em Casa (45 min fixos)</span>
+          </label>
+          <label class="opcao-modo">
+            <input type="radio" name="modo-prova" value="sala" />
+            <span>🏫 Prova em Sala de Aula (sincronizada com sinal)</span>
+          </label>
+          <div id="info-modo-sala" class="info-modo-sala oculto">
+            <p>⏰ Detectado: <strong id="info-aula-atual">--</strong></p>
+            <p>🔔 Sinal às: <strong id="info-sinal">--</strong></p>
+            <p>🛑 Prova encerra às: <strong id="info-encerramento">--</strong></p>
+            <p>⏱️ Tempo total: <strong id="info-tempo-total">--</strong></p>
+            <p>📝 Revisão disponível: <strong id="info-tempo-revisao">--</strong></p>
+          </div>
+        </div>
 
         <div class="regras-prova-box">
-          <h4>📋 Instruções de Execução:</h4>
+          <h3>📋 Instruções de Execução:</h3>
           <ul>
-            <li><strong>Questão Fácil:</strong> 8 minutos com cronômetro regressivo.</li>
-            <li><strong>Questão Média:</strong> 10 minutos.</li>
-            <li><strong>Questão Difícil:</strong> 12 minutos.</li>
-            <li><strong>Revisão Final:</strong> 15 minutos com todas as 3 questões visíveis simultaneamente.</li>
-            <li>Resolva no caderno de prova: <strong>I. Dados</strong>, <strong>II. Equação</strong> e <strong>III. Resolução</strong>.</li>
+            <li>Questão Fácil: 8 minutos com cronômetro regressivo.</li>
+            <li>Questão Média: 10 minutos.</li>
+            <li>Questão Difícil: 12 minutos.</li>
+            <li>Revisão Final: 15 minutos com todas as 3 questões visíveis simultaneamente.</li>
+            <li>Resolva no caderno de prova: I. Dados, II. Equação e III. Resolução.</li>
           </ul>
         </div>
 
-        <div id="animacao-relogio" class="relogio-sorteio-box oculto">
-          <div class="relogio-spinner">⏱️</div>
-          <div class="texto-sorteio" id="texto-sorteio">Sorteando questões aleatórias...</div>
+        <div class="relogio-sorteio-box oculto" id="animacao-relogio">
+          <span class="relogio-spinner">⏱️</span>
+          <p>Sorteando questões aleatórias...</p>
         </div>
 
-        <div class="acoes-iniciar-prova">
-          <button type="button" id="btn-iniciar-avaliacao-oficial" class="btn-acao btn-iniciar-prova-relogio">
-            <span class="icone-relogio-btn">⏱️</span> SORTEAR E INICIAR AGORA
-          </button>
-        </div>
+        <button type="button" class="btn-acao grande btn-iniciar-prova-relogio" id="btn-iniciar-avaliacao-oficial">
+          ⏱️ SORTEAR E INICIAR AGORA
+        </button>
       </div>
+      
 
-      <!-- Execução da Prova -->
-      <div id="painel-execucao-prova" class="oculto">
+      <!-- Painel de execução da prova -->
+      <div class="card oculto" id="painel-execucao-prova">
         <div class="cabecalho-avaliacao-ativo">
           <div>
             <span class="tag-semente-prova" id="tag-semente-prova">Sorteio #000</span>
-            <span class="tag-aluno-prova" id="tag-aluno-prova">Aluno: ---</span>
+            <span style="font-weight:bold; color:#495057;" id="tag-aluno-prova">Aluno: ---</span>
           </div>
-          <div class="cronometro-destaque">
-            <span class="rotulo-etapa-tempo">TEMPO RESTANTE</span>
-            <span class="visor-grande-tempo" id="visor-grande-tempo">00:00</span>
-          </div>
+          <!-- CRONÔMETRO DIGITAL REMOVIDO (causa ansiedade) -->
         </div>
 
+        <!-- BARRA DE PROGRESSO SEMPRE VERDE -->
         <div class="barra-tempo-trilha">
-          <div class="barra-tempo-preenchimento" id="barra-tempo-preenchimento"></div>
+          <div class="barra-tempo-preenchimento" id="barra-tempo-preenchimento" style="width:100%"></div>
         </div>
 
         <div class="banner-fase-etapa" id="banner-fase-etapa">
-          🟢 ETAPA 1 DE 3 — QUESTÃO FÁCIL
+          🟢 <strong>ETAPA 1 DE 3 — QUESTÃO FÁCIL</strong> (Foco Exclusivo • 8 minutos)
         </div>
 
-        <div id="controles-tempo-extra" class="painel-tempo-extra oculto">
-          <span>⏱️ <strong>Tempo Adicional:</strong></span>
+        <div class="painel-tempo-extra oculto" id="controles-tempo-extra">
+          <span>⏱️ Tempo Adicional:</span>
           <button type="button" class="btn-tempo-extra" onclick="adicionarTempoExtra(5)">+5 Min</button>
           <button type="button" class="btn-tempo-extra" onclick="adicionarTempoExtra(10)">+10 Min</button>
+          <button type="button" class="btn-acao pequeno btn-sair-prova" id="btn-encerrar-antecipado">Finalizar e Entregar 🛑</button>
         </div>
 
         <div id="container-questao-ativa"></div>
 
         <div class="rodape-avaliacao-botoes">
-          <button type="button" class="btn-acao btn-sair-prova" id="btn-encerrar-antecipado">Finalizar e Entregar</button>
+          <button type="button" class="btn-acao btn-sair-prova" id="btn-encerrar-antecipado-2">🛑 Encerrar Antecipadamente</button>
         </div>
       </div>
 
-      <!-- Fim da Prova -->
-      <div id="painel-fim-prova" class="card card-fim-prova oculto">
-        <div class="tape"></div>
-        <div class="icone-fim-prova">🛑</div>
+      <!-- Painel de fim de prova -->
+      <div class="card card-fim-prova oculto" id="painel-fim-prova">
+        <div class="icone-fim-prova">🏁</div>
         <h2 class="titulo-fim-prova">SIMULADO CONCLUÍDO</h2>
-        
+        <p>Confira suas anotações ou repita o teste com um novo sorteio:</p>
         <div class="bloco-folha-entrega">
-          <p class="instrucao-entrega">Confira suas anotações ou repita o teste com um novo sorteio:</p>
-          <div class="dados-entrega-folha">
-            <div class="linha-folha"><strong>Estudante:</strong> <span id="folha-nome-aluno">---</span></div>
-            <div class="linha-folha"><strong>Data:</strong> <span id="folha-data">--/--/----</span></div>
-          </div>
+          <div class="linha-folha"><span>Estudante:</span> <span id="folha-nome-aluno">---</span></div>
+          <div class="linha-folha"><span>Data:</span> <span id="folha-data">--/--/----</span></div>
         </div>
-
-        <div class="acoes-pos-prova">
+        <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:20px;">
           <button type="button" class="btn-acao" id="btn-novo-simulado">🔄 Realizar Novo Sorteio</button>
-          <button type="button" class="btn-acao btn-destaque-acao" id="btn-ver-gabarito-simulado">📖 Conferir Resolução do Simulado</button>
+          <button type="button" class="btn-acao" id="btn-ver-gabarito-simulado">📖 Conferir Resolução do Simulado</button>
         </div>
-
-        <div id="gabarito-pos-prova" class="oculto" style="margin-top: 24px; text-align: left;"></div>
+        <div id="gabarito-pos-prova" class="oculto" style="margin-top:20px; text-align:left;"></div>
       </div>
-
     </section>
-
   </main>
 
-  <footer>
-    <p style="text-align: center; font-size: 0.95rem; color: #5c6b8a; margin: 30px 0;">
-      Treinamento de Cinemática &bull; Memória Humana de Longo Prazo &bull; Algoritmo de 3 Fases do Prof. André
-    </p>
+<!-- MODAL DE PREVIEW DO SORTEIO -->
+      <div class="modal-overlay oculto" id="modal-preview-sorteio">
+        <div class="modal-card">
+		    <!-- ===== BOTÃO FECHAR (este é o elemento que faltava) ===== -->
+    <button type="button" class="btn-fechar-modal" id="btn-fechar-preview"
+            title="Fechar e voltar ao site"
+            style="position:absolute; top:10px; right:14px; z-index:5;">×</button>
+		
+          <h2 style="text-align:center;">🎲 Combinação Sorteada</h2>
+          <div class="preview-sorteio-info">
+            <p style="font-size:2rem; text-align:center; font-family:'Fira Code',monospace;">
+              Sorteio #<span id="preview-seed">000</span>
+            </p>
+            <p style="text-align:center; color:#495057;">
+              Total de combinações possíveis: <strong>864</strong>
+            </p>
+          </div>
+          <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin:20px 0;">
+            <button type="button" class="btn-acao" id="btn-resortear">🔄 Sortear Novamente</button>
+            <button type="button" class="btn-acao" id="btn-digitar-seed">✏️ Digitar Seed</button>
+          </div>
+          <button type="button" class="btn-acao grande btn-destaque-acao" id="btn-confirmar-inicio" style="width:100%;">
+            ▶️ INICIAR PROVA AGORA
+          </button>
+        </div>
+      </div>
+
+  <!-- ===== MODAL DE PREVIEW DO SORTEIO (fora do main) ===== -->
+  <div class="modal-overlay oculto" id="modal-preview-sorteio">
+    <div class="modal-card">
+      <button type="button" class="btn-fechar-modal" id="btn-fechar-preview" title="Fechar e voltar ao site">×</button>
+      <h2 style="text-align:center;">🎲 Combinação Sorteada</h2>
+      <div class="preview-sorteio-info">
+        <p style="font-size:2rem; text-align:center; font-family:'Fira Code',monospace;">
+          Sorteio #<span id="preview-seed">000</span>
+        </p>
+        <p style="text-align:center; color:#495057;">
+          Total de combinações possíveis: <strong>864</strong>
+        </p>
+      </div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin:20px 0;">
+        <button type="button" class="btn-acao" id="btn-resortear">🔄 Sortear Novamente</button>
+        <button type="button" class="btn-acao" id="btn-digitar-seed">✏️ Digitar Seed</button>
+      </div>
+      <button type="button" class="btn-acao grande btn-destaque-acao" id="btn-confirmar-inicio" style="width:100%;">
+        ▶️ INICIAR PROVA AGORA
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== BOTÃO FLUTUANTE DE EQUAÇÕES ===== -->
+  <button type="button" class="btn-flutuante" id="btn-flutuante-equacoes">📐 Fórmulas (Quadro)</button>
+
+  <!-- ===== MODAL DE EQUAÇÕES ===== -->
+  <div class="modal-overlay oculto" id="overlay-equacoes">
+    <div class="modal-card">
+      <button type="button" class="btn-fechar-modal" id="btn-fechar-equacoes">×</button>
+      <h2>Banco de Equações Disponíveis (Quadro de Consulta)</h2>
+      <div class="grade-equacoes" id="painel-equacoes-overlay"></div>
+    </div>
+  </div>
+
+  <footer style="text-align:center; padding:30px 0; color:#868e96; font-size:0.95rem;">
+    Treinamento de Cinemática • Memória Humana de Longo Prazo • Algoritmo de 3 Fases do Prof. André
   </footer>
 
-  <!-- Scripts KaTeX -->
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
-
-  <!-- Script da Aplicação -->
   <script src="app.js"></script>
 </body>
 </html>

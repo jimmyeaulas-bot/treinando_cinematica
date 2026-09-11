@@ -13,20 +13,27 @@ html { scroll-behavior: smooth; }
   --destaque-fundo: #fffdf2;
   --cinza-bloq: #adb5bd;
   --cinza-bg: #f8f9fa;
+  
+  /* SISTEMA DE ZOOM */
+  --font-scale: 1.5;
+  --font-base: calc(1.15rem * var(--font-scale));
+  --font-enunciado: calc(1.25rem * var(--font-scale));
+  --font-titulo: calc(2rem * var(--font-scale));
 }
 
 body {
   margin: 0;
   color: #21315e;
   font-family: 'Patrick Hand', system-ui, sans-serif;
-  font-size: 1.15rem;
+  font-size: var(--font-base);
   line-height: 1.5;
   padding: 0 14px 40px 14px;
   background-color: var(--papel);
-  background-image: 
+  background-image:
     linear-gradient(var(--grade) 1px, transparent 1px),
     linear-gradient(90deg, var(--grade) 1px, transparent 1px);
   background-size: 22px 22px;
+  transition: font-size 0.3s ease;
 }
 
 body::before {
@@ -39,6 +46,7 @@ body::before {
   pointer-events: none;
   z-index: 0;
 }
+
 body::after {
   content: "";
   position: fixed;
@@ -55,7 +63,7 @@ body::after {
   body { padding: 0 10px 30px 10px; }
 }
 
-/* ===== BARRA SUPERIOR RETRÁTIL & OCULTÁVEL ===== */
+/* ===== BARRA SUPERIOR ===== */
 .barra-superior-aluno {
   position: sticky;
   top: 0;
@@ -68,6 +76,7 @@ body::after {
   backdrop-filter: blur(4px);
   transition: all 0.25s ease;
 }
+
 @media (max-width: 760px) {
   .barra-superior-aluno { margin: 0 -10px 15px -10px; }
 }
@@ -91,7 +100,7 @@ body::after {
 
 .nome-aluno-destaque {
   font-family: 'Caveat', cursive;
-  font-size: 1.45rem;
+  font-size: calc(1.45rem * var(--font-scale));
   color: var(--ink);
 }
 
@@ -101,17 +110,18 @@ body::after {
   border-radius: 6px;
   padding: 2px 8px;
   font-family: 'Patrick Hand', sans-serif;
-  font-size: 0.95rem;
+  font-size: calc(0.95rem * var(--font-scale));
   cursor: pointer;
   transition: 0.15s;
 }
+
 .btn-editar-nome:hover {
   background: var(--yel);
   border-color: #f59f00;
 }
 
 .badge-acordo {
-  font-size: 0.85rem;
+  font-size: calc(0.85rem * var(--font-scale));
   padding: 2px 8px;
   border-radius: 6px;
   font-weight: bold;
@@ -119,6 +129,7 @@ body::after {
   color: #d9480f;
   border: 1px solid #fcc419;
 }
+
 .badge-acordo.assinado {
   background: #d3f9d8;
   color: #2b8a3e;
@@ -131,13 +142,15 @@ body::after {
   min-width: 200px;
   max-width: 400px;
 }
+
 .info-progresso-topo {
   display: flex;
   justify-content: space-between;
-  font-size: 0.95rem;
+  font-size: calc(0.95rem * var(--font-scale));
   margin-bottom: 2px;
 }
-.fracao-questoes { color: #868e96; font-size: 0.85rem; }
+
+.fracao-questoes { color: #868e96; font-size: calc(0.85rem * var(--font-scale)); }
 
 .trilha-progresso-geral {
   height: 12px;
@@ -146,10 +159,58 @@ body::after {
   border-radius: 6px;
   overflow: hidden;
 }
+
 .preenchimento-progresso-geral {
   height: 100%;
   background: linear-gradient(90deg, var(--yel), var(--green));
   transition: width 0.4s ease;
+}
+
+/* BOTÕES DE ZOOM */
+.controles-zoom {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #f8f9fa;
+  border: 2px solid var(--ink);
+  border-radius: 8px;
+  padding: 4px 8px;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.controles-zoom.oculto-zoom {
+  opacity: 0.3;
+  transform: scale(0.85);
+}
+
+.controles-zoom.oculto-zoom:hover {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.btn-zoom {
+  background: #fff;
+  border: 2px solid var(--ink);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-family: 'Patrick Hand', sans-serif;
+  font-size: calc(1.1rem * var(--font-scale));
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.15s;
+}
+
+.btn-zoom:hover {
+  background: var(--yel);
+}
+
+.zoom-indicador {
+  font-family: 'Fira Code', monospace;
+  font-size: calc(1rem * var(--font-scale));
+  font-weight: bold;
+  color: var(--ink);
+  min-width: 50px;
+  text-align: center;
 }
 
 /* Botões do Topo */
@@ -158,6 +219,7 @@ body::after {
   align-items: center;
   gap: 8px;
 }
+
 .btn-ocultar-topo {
   background: #fff;
   border: 1px solid var(--ink);
@@ -165,12 +227,13 @@ body::after {
   border-radius: 6px;
   padding: 3px 8px;
   font-family: 'Patrick Hand', sans-serif;
-  font-size: 0.95rem;
+  font-size: calc(0.95rem * var(--font-scale));
   cursor: pointer;
 }
+
 .btn-ocultar-topo:hover { background: #e7f5ff; }
 
-/* Botão Flutuante para reabrir topo quando oculto */
+/* Botão Flutuante para reabrir topo */
 .btn-reabrir-topo {
   position: fixed;
   top: 6px;
@@ -182,41 +245,45 @@ body::after {
   border-radius: 20px;
   padding: 4px 14px;
   font-family: 'Caveat', cursive;
-  font-size: 1.15rem;
+  font-size: calc(1.15rem * var(--font-scale));
   font-weight: bold;
   box-shadow: 2px 2px 4px rgba(0,0,0,0.15);
   cursor: pointer;
 }
+
 .btn-reabrir-topo:hover { background: var(--yel); }
 
-/* Gaveta Retrátil de Edição */
+/* Gaveta Retrátil */
 .gaveta-conteudo {
   max-width: 1040px;
   margin: 8px auto 4px auto;
   border-top: 1px dashed #ced4da;
   padding-top: 10px;
 }
+
 .card-gaveta-interno {
   background: var(--destaque-fundo);
   border: 2px dashed var(--ink);
   border-radius: 12px;
   padding: 14px 18px;
 }
+
 .campo-gaveta input {
   padding: 6px 12px;
   font-family: 'Caveat', cursive;
-  font-size: 1.3rem;
+  font-size: calc(1.3rem * var(--font-scale));
   border: 2px solid var(--ink);
   border-radius: 8px;
   flex: 1;
   min-width: 260px;
 }
+
 .check-acordo-gaveta {
   display: flex;
   gap: 8px;
   align-items: center;
   margin-top: 8px;
-  font-size: 1.05rem;
+  font-size: calc(1.05rem * var(--font-scale));
   cursor: pointer;
 }
 
@@ -227,16 +294,19 @@ h1, h2, h3, h4 {
   line-height: 1.15;
   margin: .3em 0;
 }
-h1 { 
-  font-size: clamp(2rem, 5vw, 2.7rem); 
-  text-decoration: underline wavy var(--yel); 
+
+h1 {
+  font-size: var(--font-titulo);
+  text-decoration: underline wavy var(--yel);
 }
-header.topo, main, footer { 
-  max-width: 1040px; 
-  margin: 0 auto; 
-  position: relative; 
-  z-index: 1; 
+
+header.topo, main, footer {
+  max-width: 1040px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
 }
+
 header.topo { padding-top: 8px; }
 
 .meta-header {
@@ -246,15 +316,17 @@ header.topo { padding-top: 8px; }
   flex-wrap: wrap;
   gap: 10px;
 }
+
 .tag-prof {
   background: #e7f5ff;
   border: 2px solid var(--ink);
   padding: 4px 14px;
   border-radius: 8px;
   font-family: 'Caveat', cursive;
-  font-size: 1.3rem;
+  font-size: calc(1.3rem * var(--font-scale));
   font-weight: bold;
 }
+
 .prog {
   border: 2px dashed var(--green);
   color: var(--green);
@@ -263,8 +335,9 @@ header.topo { padding-top: 8px; }
   font-weight: bold;
   background: #fff;
 }
+
 .btn-professor {
-  font-size: 1.3rem;
+  font-size: calc(1.3rem * var(--font-scale));
   background: #fff;
   border: 2px solid #868e96;
   border-radius: 50%;
@@ -275,12 +348,14 @@ header.topo { padding-top: 8px; }
   justify-content: center;
   cursor: pointer;
 }
+
 .btn-professor:hover { border-color: var(--ink); background: #e7f5ff; }
 
 /* Abas */
-nav[aria-label] ol { 
-  display: flex; gap: 8px; list-style: none; padding: 12px 0; overflow-x: auto; margin: 0; 
+nav[aria-label] ol {
+  display: flex; gap: 8px; list-style: none; padding: 12px 0; overflow-x: auto; margin: 0;
 }
+
 .btn-aba {
   min-width: 85px;
   min-height: 42px;
@@ -291,37 +366,43 @@ nav[aria-label] ol {
   box-shadow: 3px 3px 0 var(--ink);
   font-family: 'Caveat', cursive;
   font-weight: 700;
-  font-size: 1.3rem;
+  font-size: calc(1.3rem * var(--font-scale));
   cursor: pointer;
   white-space: nowrap;
 }
+
 .btn-aba:hover { background: #e7f5ff; }
+
 .btn-aba.ativa {
   background: var(--yel);
   transform: translate(2px, 2px);
   box-shadow: 1px 1px 0 var(--ink);
 }
+
 .btn-painel-final { background: #e6fcf5; border-color: var(--green); color: #0ca678; }
+
 .btn-prova-final {
   background: #f3d9fa;
   border-color: #862e9c;
   color: #862e9c;
 }
+
 .btn-prova-final.bloqueada {
   opacity: 0.6;
   filter: grayscale(0.5);
   cursor: not-allowed;
 }
 
-/* Fita Adesiva Decorativa */
+/* Fita Adesiva */
 .tape {
   position: absolute; height: 26px; width: 110px;
   background: rgba(255, 212, 59, .75);
   top: -13px; left: 34px; transform: rotate(-4deg);
   pointer-events: none;
 }
-.tape.t2 { 
-  left: auto; right: 34px; transform: rotate(3deg); background: rgba(116, 192, 252, .6); 
+
+.tape.t2 {
+  left: auto; right: 34px; transform: rotate(3deg); background: rgba(116, 192, 252, .6);
 }
 
 .card, .questao-card {
@@ -332,34 +413,45 @@ nav[aria-label] ol {
   padding: 16px 20px;
   position: relative;
   margin: 24px 0;
+  transition: background-color 0.6s ease;
 }
 
-/* Quadro de Fórmulas Sanfonado */
+/* CORES DE FUNDO POR DIFICULDADE (PROVA) */
+.etapa-facil { background-color: #d3f9d8; }
+.etapa-medio { background-color: #fff9db; }
+.etapa-dificil { background-color: #ffe0e0; }
+
+/* Quadro de Fórmulas */
 .cabecalho-sanfona {
   display: flex; justify-content: space-between; align-items: center; cursor: pointer;
 }
+
 .grade-equacoes {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 12px;
   margin-top: 14px;
 }
+
 .card-formula {
   background: #fff; border: 2px solid var(--ink); border-radius: 10px; padding: 10px 14px;
   box-shadow: 2px 2px 0 #cad7ee;
 }
-.card-formula .tag-tipo {
-  font-size: 0.85rem; font-weight: bold; color: #fff; background: var(--ink); padding: 1px 8px; border-radius: 4px;
-}
-.card-formula .formula-render { font-size: 1.25rem; margin: 8px 0; text-align: center; }
 
-/* Medalhas / Mural */
+.card-formula .tag-tipo {
+  font-size: calc(0.85rem * var(--font-scale)); font-weight: bold; color: #fff; background: var(--ink); padding: 1px 8px; border-radius: 4px;
+}
+
+.card-formula .formula-render { font-size: var(--font-enunciado); margin: 8px 0; text-align: center; }
+
+/* Medalhas */
 .grade-medalhas {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
   gap: 12px;
   margin-top: 10px;
 }
+
 .card-medalha {
   text-align: center;
   background: #fff;
@@ -370,22 +462,26 @@ nav[aria-label] ol {
   filter: grayscale(0.9);
   transition: all 0.2s ease;
 }
+
 .card-medalha.conquistada {
   opacity: 1; filter: grayscale(0); border-style: solid; border-color: #f59f00; background: #fff9db; box-shadow: 3px 3px 0 rgba(245, 159, 0, 0.4);
 }
+
 .icone-medalha {
-  font-size: 2.2rem;
+  font-size: calc(2.2rem * var(--font-scale));
   display: flex;
   justify-content: center;
   align-items: center;
   margin-bottom: 4px;
   min-height: 48px;
 }
-.icone-medalha svg { display: block; }
-.nome-medalha { font-family: 'Caveat', cursive; font-size: 1.25rem; font-weight: bold; }
-.meta-medalha { font-size: 0.85rem; color: #495057; }
 
-/* Cabeçalho do Kit Ativo com Botão de Reset */
+.icone-medalha svg { display: block; }
+
+.nome-medalha { font-family: 'Caveat', cursive; font-size: calc(1.25rem * var(--font-scale)); font-weight: bold; }
+.meta-medalha { font-size: calc(0.85rem * var(--font-scale)); color: #495057; }
+
+/* Cabeçalho do Kit */
 .topo-kit-ativo {
   display: flex;
   justify-content: space-between;
@@ -396,7 +492,9 @@ nav[aria-label] ol {
   border-bottom: 2px dashed #ced4da;
   padding-bottom: 8px;
 }
-.titulo-kit { font-size: 2rem; margin: 0; }
+
+.titulo-kit { font-size: var(--font-titulo); margin: 0; }
+
 .btn-reset-kit {
   font-family: 'Patrick Hand', sans-serif;
   background: #fff5f5;
@@ -404,25 +502,28 @@ nav[aria-label] ol {
   border: 1px solid var(--red);
   border-radius: 8px;
   padding: 4px 12px;
-  font-size: 1rem;
+  font-size: calc(1rem * var(--font-scale));
   cursor: pointer;
   transition: all 0.15s ease;
 }
+
 .btn-reset-kit:hover { background: #ffe3e3; }
 
-/* Card da Questão & 3 Fases */
+/* Card da Questão */
 .card-cabecalho {
   display: flex; align-items: center; gap: 12px; flex-wrap: wrap; border-bottom: 2px dashed #d6e6f7; padding-bottom: 8px; margin-bottom: 12px;
 }
+
 .num-q {
-  display: inline-grid; place-items: center; width: 44px; height: 44px; border: 2px solid var(--ink); border-radius: 50%; background: var(--yel); font-family: 'Caveat', cursive; font-size: 1.5rem; font-weight: 700;
+  display: inline-grid; place-items: center; width: 44px; height: 44px; border: 2px solid var(--ink); border-radius: 50%; background: var(--yel); font-family: 'Caveat', cursive; font-size: calc(1.5rem * var(--font-scale)); font-weight: 700;
 }
-.tag-nivel { font-family: 'Caveat', cursive; font-size: 1.15rem; font-weight: bold; padding: 2px 10px; border-radius: 999px; border: 2px solid; }
+
+.tag-nivel { font-family: 'Caveat', cursive; font-size: calc(1.15rem * var(--font-scale)); font-weight: bold; padding: 2px 10px; border-radius: 999px; border: 2px solid; }
 .tag-nivel.facil { color: var(--green); border-color: var(--green); background: #ebfbee; }
 .tag-nivel.medio { color: #f59f00; border-color: #f59f00; background: #fff9db; }
 .tag-nivel.dificil { color: var(--red); border-color: var(--red); background: #fff5f5; }
 
-/* Grade das 3 Fases com Dicas Integradas */
+/* Grade das 3 Fases */
 .fases-grade { display: grid; grid-template-columns: 1fr; gap: 14px; margin-top: 14px; }
 @media (min-width: 860px) { .fases-grade { grid-template-columns: 1fr 1fr 1fr; } }
 
@@ -436,21 +537,24 @@ nav[aria-label] ol {
   justify-content: flex-start;
   gap: 8px;
 }
+
 .bloco-fase.concluida { border-color: var(--green); background: #f4fbf5; }
+
 .titulo-fase {
   font-family: 'Caveat', cursive;
-  font-size: 1.35rem;
+  font-size: calc(1.35rem * var(--font-scale));
   margin: 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
-.cronometro-fase { font-family: 'Fira Code', monospace; font-size: 0.95rem; font-weight: bold; color: #495057; }
 
-/* Dicas dentro das fases */
+.cronometro-fase { font-family: 'Fira Code', monospace; font-size: calc(0.95rem * var(--font-scale)); font-weight: bold; color: #495057; }
+
+/* Dicas */
 .btn-dica-fase {
   font-family: 'Patrick Hand', cursive;
-  font-size: 0.95rem;
+  font-size: calc(0.95rem * var(--font-scale));
   background: #fff9db;
   border: 1px dashed #f59f00;
   color: #d9480f;
@@ -460,22 +564,25 @@ nav[aria-label] ol {
   text-align: center;
   transition: 0.15s;
 }
+
 .btn-dica-fase:hover { background: #ffe066; }
+
 .caixa-dica-fase {
   background: #fffdf2;
   border-left: 3px solid #f59f00;
   padding: 8px;
-  font-size: 0.95rem;
+  font-size: calc(0.95rem * var(--font-scale));
   color: #5c3a00;
   border-radius: 4px;
 }
 
 /* Botões */
 .btn-acao {
-  font-family: 'Caveat', cursive; font-size: 1.25rem; font-weight: 700; padding: 6px 14px; border: 2px solid var(--ink); border-radius: 10px; background: #fff; color: var(--ink); box-shadow: 2px 2px 0 var(--ink); cursor: pointer; transition: all 0.1s ease; width: 100%;
+  font-family: 'Caveat', cursive; font-size: calc(1.25rem * var(--font-scale)); font-weight: 700; padding: 6px 14px; border: 2px solid var(--ink); border-radius: 10px; background: #fff; color: var(--ink); box-shadow: 2px 2px 0 var(--ink); cursor: pointer; transition: all 0.1s ease; width: 100%;
 }
-.btn-acao.pequeno { font-size: 1.1rem; padding: 4px 12px; width: auto; }
-.btn-acao.grande { font-size: 1.45rem; padding: 10px 20px; }
+
+.btn-acao.pequeno { font-size: calc(1.1rem * var(--font-scale)); padding: 4px 12px; width: auto; }
+.btn-acao.grande { font-size: calc(1.45rem * var(--font-scale)); padding: 10px 20px; }
 .btn-acao:hover:not(:disabled) { background: #e7f5ff; }
 .btn-acao:active:not(:disabled) { transform: translate(2px, 2px); box-shadow: none; }
 .btn-acao:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
@@ -492,6 +599,7 @@ nav[aria-label] ol {
   padding: 20px;
   box-shadow: 4px 4px 0 #bbf7d0;
 }
+
 .box-gabarito-bloqueado {
   margin-top: 30px;
   background: #f8f9fa;
@@ -502,26 +610,31 @@ nav[aria-label] ol {
   color: #495057;
 }
 
-/* Modais e Overlays */
+/* Modais */
 .modal-overlay {
   position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(10, 25, 50, 0.8); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 16px; backdrop-filter: blur(3px);
 }
+
 .modal-overlay.oculto { display: none !important; }
+
 .modal-card {
   background: #fffef7; border: 3px solid var(--ink); border-radius: 16px; max-width: 600px; width: 100%; padding: 24px; position: relative; box-shadow: 8px 8px 0 rgba(0,0,0,0.3); max-height: 90vh; overflow-y: auto;
 }
+
 .btn-fechar-modal { background: none; border: none; font-size: 2rem; cursor: pointer; color: var(--ink); font-weight: bold; line-height: 1; }
-.postit { background: #fff9b1; border-radius: 2px; box-shadow: 3px 4px 7px rgba(0, 0, 0, 0.12); padding: 12px 14px; font-family: 'Caveat', cursive; font-size: 1.25rem; margin: 12px 0; }
+
+.postit { background: #fff9b1; border-radius: 2px; box-shadow: 3px 4px 7px rgba(0, 0, 0, 0.12); padding: 12px 14px; font-family: 'Caveat', cursive; font-size: calc(1.25rem * var(--font-scale)); margin: 12px 0; }
 
 /* Diploma */
 .diploma-borda { border: 6px double var(--ink); background: #ffffff; padding: 24px; text-align: center; border-radius: 10px; }
-.diploma-titulo { font-size: 2.8rem; color: var(--ink); margin: 4px 0 14px 0; text-decoration: underline wavy var(--yel); }
-#diploma-nome-exibicao { font-family: 'Caveat', cursive; font-size: 2.4rem; font-weight: bold; color: var(--red); border-bottom: 2px dashed var(--ink); display: inline-block; min-width: 250px; }
+.diploma-titulo { font-size: calc(2.8rem * var(--font-scale)); color: var(--ink); margin: 4px 0 14px 0; text-decoration: underline wavy var(--yel); }
+#diploma-nome-exibicao { font-family: 'Caveat', cursive; font-size: calc(2.4rem * var(--font-scale)); font-weight: bold; color: var(--red); border-bottom: 2px dashed var(--ink); display: inline-block; min-width: 250px; }
+
 .grade-kits-metricas { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin-top: 14px; }
 .card-kit-metrica { background: #fff; border-radius: 12px; padding: 14px; border: 2px dashed var(--cinza-bloq); }
 .card-kit-metrica.concluido { border: 2px solid var(--green); background: #ebfbee; }
 
-/* Botão Flutuante de Equações (Visível Sempre) */
+/* Botão Flutuante */
 .btn-flutuante {
   position: fixed;
   bottom: 24px;
@@ -532,50 +645,102 @@ nav[aria-label] ol {
   border: 3px solid var(--ink);
   box-shadow: 4px 4px 0 var(--ink);
   font-family: 'Caveat', cursive;
-  font-size: 1.35rem;
+  font-size: calc(1.35rem * var(--font-scale));
   font-weight: 700;
   padding: 10px 18px;
   border-radius: 30px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
+
 .btn-flutuante:hover {
   transform: scale(1.05);
   background: #ffe066;
 }
 
-/* Modo Prova / Simulado */
+/* Modo Prova */
 .card-pre-prova { max-width: 780px; margin: 30px auto; text-align: center; padding: 30px; }
 .regras-prova-box { background: #f8fbff; border: 2px dashed var(--ink); border-radius: 12px; padding: 16px 22px; text-align: left; margin: 20px 0; }
 .relogio-sorteio-box { background: #fff9db; border: 2px solid #f59f00; border-radius: 12px; padding: 20px; margin: 20px auto; max-width: 500px; text-align: center; }
-.relogio-spinner { font-size: 3.5rem; display: inline-block; animation: giraRelogio 1s linear infinite; }
+.relogio-spinner { font-size: calc(3.5rem * var(--font-scale)); display: inline-block; animation: giraRelogio 1s linear infinite; }
 @keyframes giraRelogio { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-.btn-iniciar-prova-relogio { font-size: 1.6rem; padding: 12px 30px; background: var(--green); color: #fff; border-color: #1b5e20; box-shadow: 4px 4px 0 #1b5e20; margin: 0 auto; display: flex; align-items: center; justify-content: center; gap: 12px; }
+.btn-iniciar-prova-relogio { font-size: calc(1.6rem * var(--font-scale)); padding: 12px 30px; background: var(--green); color: #fff; border-color: #1b5e20; box-shadow: 4px 4px 0 #1b5e20; margin: 0 auto; display: flex; align-items: center; justify-content: center; gap: 12px; }
 
+/* SELETOR DE MODO */
+.seletor-modo-prova {
+  background: #f8fbff;
+  border: 2px solid var(--ink);
+  border-radius: 12px;
+  padding: 16px;
+  margin: 20px 0;
+  text-align: left;
+}
+
+.opcao-modo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  margin: 8px 0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.opcao-modo:hover { background: #e7f5ff; }
+.opcao-modo input[type="radio"] { width: 20px; height: 20px; }
+
+.info-modo-sala {
+  background: #fff9db;
+  border: 2px dashed #f59f00;
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 12px;
+  font-size: calc(1rem * var(--font-scale));
+}
+
+.info-modo-sala p { margin: 4px 0; }
+
+/* PREVIEW DO SORTEIO */
+.preview-sorteio-info {
+  background: #f8f9fa;
+  border: 2px solid var(--ink);
+  border-radius: 12px;
+  padding: 20px;
+  margin: 16px 0;
+}
+
+/* Prova */
 .cabecalho-avaliacao-ativo { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 12px; border-bottom: 2px solid var(--ink); padding-bottom: 12px; }
 .tag-semente-prova { background: #f3d9fa; border: 2px solid #862e9c; color: #862e9c; font-family: 'Fira Code', monospace; padding: 4px 12px; border-radius: 8px; font-weight: bold; margin-right: 8px; }
-.cronometro-destaque { background: #fff; border: 3px solid var(--ink); border-radius: 12px; padding: 6px 16px; box-shadow: 3px 3px 0 var(--ink); }
-.rotulo-etapa-tempo { display: block; font-size: 0.8rem; font-weight: bold; color: #868e96; }
-.visor-grande-tempo { font-family: 'Fira Code', monospace; font-size: 2.2rem; font-weight: bold; color: var(--red); }
+
+/* BARRA SEMPRE VERDE (sem cronômetro digital) */
 .barra-tempo-trilha { width: 100%; height: 18px; background: #e9ecef; border-radius: 9px; overflow: hidden; border: 2px solid #ced4da; margin-bottom: 14px; }
 .barra-tempo-preenchimento { height: 100%; width: 100%; background: var(--green); transition: width 0.5s ease; }
-.banner-fase-etapa { background: #e7f5ff; border-left: 6px solid var(--ink); padding: 10px 16px; font-family: 'Caveat', cursive; font-size: 1.45rem; font-weight: bold; color: var(--ink); border-radius: 6px; margin-bottom: 18px; }
 
+.banner-fase-etapa { background: #e7f5ff; border-left: 6px solid var(--ink); padding: 10px 16px; font-family: 'Caveat', cursive; font-size: calc(1.45rem * var(--font-scale)); font-weight: bold; color: var(--ink); border-radius: 6px; margin-bottom: 18px; }
 .painel-tempo-extra { background: #fff9db; border: 2px dashed #f59f00; border-radius: 10px; padding: 8px 14px; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
 .btn-tempo-extra { background: #fff; border: 2px solid #f59f00; color: #d9480f; font-family: 'Fira Code', monospace; font-weight: bold; border-radius: 6px; padding: 4px 10px; cursor: pointer; }
 .rodape-avaliacao-botoes { display: flex; justify-content: flex-end; margin-top: 20px; }
-.btn-sair-prova { background: #fff5f5; border-color: var(--red); color: var(--red); font-size: 1.1rem; }
-
+.btn-sair-prova { background: #fff5f5; border-color: var(--red); color: var(--red); font-size: calc(1.1rem * var(--font-scale)); }
 .card-fim-prova { max-width: 740px; margin: 40px auto; text-align: center; padding: 40px 30px; background: #fff; border: 4px solid var(--red); }
-.icone-fim-prova { font-size: 5rem; }
-.titulo-fim-prova { font-size: 3.2rem; color: var(--red); margin: 0 0 16px 0; }
+.icone-fim-prova { font-size: calc(5rem * var(--font-scale)); }
+.titulo-fim-prova { font-size: calc(3.2rem * var(--font-scale)); color: var(--red); margin: 0 0 16px 0; }
 .bloco-folha-entrega { background: #fffdf2; border: 2px dashed #495057; border-radius: 12px; padding: 20px; margin: 20px auto; max-width: 580px; }
-.linha-folha { border-bottom: 1px dashed #ced4da; padding: 6px 0; display: flex; justify-content: space-between; font-family: 'Caveat', cursive; font-size: 1.4rem; }
+.linha-folha { border-bottom: 1px dashed #ced4da; padding: 6px 0; display: flex; justify-content: space-between; font-family: 'Caveat', cursive; font-size: calc(1.4rem * var(--font-scale)); }
 
 .oculto { display: none !important; }
+
+/* KaTeX herda zoom */
+.katex { font-size: 1.1em !important; }
 
 @media print {
   .barra-superior-aluno, .btn-reabrir-topo, .no-print, header, nav, .mural-emblemas, #secao-formulas, .btn-flutuante { display: none !important; }
   #secao-certificado, #area-impressao { display: block !important; }
   .card.area-diploma { box-shadow: none; border: 2px solid #000; margin: 0; }
 }
+
+.tabela-historico { width: 100%; border-collapse: collapse; background: #fff; font-size: 0.95rem; }
+.tabela-historico th, .tabela-historico td { border: 1px solid #ced4da; padding: 6px 10px; text-align: center; }
+.tabela-historico th { background: #e7f5ff; color: var(--ink); }
+.btn-excluir-tentativa { background: #fff5f5; border: 1px solid var(--red); color: var(--red); border-radius: 6px; padding: 2px 8px; cursor: pointer; }
