@@ -1,5 +1,5 @@
 // =========================================================================
-// CADERNO DE CINEMÁTICA – PROF. ANDRÉ (V8 – VERSÃO CONSOLIDADA FINAL)
+// CADERNO DE CINEMÁTICA – PROF. ANDRÉ (V8.1 – CORREÇÃO DE TEMPO EM SALA)
 // =========================================================================
 // • Migração automática V7/V5 → V8
 // • Equações corrigidas (6 fórmulas, \frac)
@@ -12,6 +12,10 @@
 // • Fechamento automático 3 min antes do sinal
 // • Modos Simulado × Sala de Aula
 // • Transições sem alert()
+// • [V8.1] Timestamp absoluto de fechamento (não mais offset relativo)
+// • [V8.1] Revalidação do tempo no momento da confirmação do preview
+// • [V8.1] Teste de sanidade: soma das etapas ≤ tempo real restante
+// • [V8.1] Painel de diretrizes ao professor no preview do sorteio
 // =========================================================================
 
 // ===== 1. ÍCONE SVG DA MEDALHA DE MADEIRA =====
@@ -638,7 +642,7 @@ function acaoFase(questId, faseNum) {
     pararCronometro();
     dados[`fase${faseNum}_t`] = s;
     dados.tempoTotal = (dados.fase1_t || 0) + (dados.fase2_t || 0) + (dados.fase3_t || 0);
-        const eraConcluida = Boolean(dados.concluida);
+    const eraConcluida = Boolean(dados.concluida);
     if (faseNum === 3 || (dados.fase1_t && dados.fase2_t && dados.fase3_t)) {
       dados.concluida = true;
       if (!eraConcluida) {
@@ -806,9 +810,13 @@ function formatarSegundos(s) {
 }
 window.formatarSegundos = formatarSegundos;
 
+// [V8.1] Agora devolve TIMESTAMPS ABSOLUTOS (fechamentoMs, sinalMs)
+// para que o instante de encerramento não seja recalculado com base
+// em tempo decorrido desde o preview.
 function calcularProvaSala() {
   const agora = agoraSincronizado();
   const segAtual = agora.getHours() * 3600 + agora.getMinutes() * 60 + agora.getSeconds();
+  const agoraMs  = agora.getTime();
 
   let proximaAula = null;
   for (const aula of HORARIOS_AULA) {
@@ -831,15 +839,25 @@ function calcularProvaSala() {
     return { valido: false, motivo: 'tempo_insuficiente', mensagem: 'A aula está terminando. Aguarde o próximo período.' };
   }
 
+  // Timestamps absolutos (mesmo referencial de Date.now() + OFFSET_NTP_MS)
+  const meiaNoiteMs = new Date(
+    agora.getFullYear(), agora.getMonth(), agora.getDate()
+  ).getTime();
+  const sinalMs      = meiaNoiteMs + sinalSeg * 1000;
+  const fechamentoMs = meiaNoiteMs + fechamentoSeg * 1000;
+
   const MINIMO_VIAVEL = 10 * 60;
   const ALERTA_MAXIMO = 15 * 60;
-  const TEMPO_PADRAO = 30 * 60;
+  const TEMPO_PADRAO  = 30 * 60;
 
   const infoBase = {
     aula: proximaAula,
     sinal: segundosParaHora(sinalSeg),
     fechamento: segundosParaHora(fechamentoSeg),
-    tempoTotal
+    tempoTotal,
+    sinalMs,
+    fechamentoMs,
+    calculadoEmMs: agoraMs
   };
 
   if (tempoTotal < MINIMO_VIAVEL) {
@@ -873,24 +891,31 @@ function calcularProvaSala() {
       valido: true,
       modo: 'penalidade_proporcional',
       etapas: [
-        { nivel: 'facil', tempo: Math.max(60, 8 * 60 - reducaoPorQuestao) },
-        { nivel: 'medio', tempo: Math.max(60, 10 * 60 - reducaoPorQuestao) },
+        { nivel: 'facil',   tempo: Math.max(60, 8  * 60 - reducaoPorQuestao) },
+        { nivel: 'medio',   tempo: Math.max(60, 10 * 60 - reducaoPorQuestao) },
         { nivel: 'dificil', tempo: Math.max(60, 12 * 60 - reducaoPorQuestao) }
       ],
       mensagem: `⏱️ Penalidade por atraso: ${reducaoPorQuestao}s a menos por questão.`
     };
   }
 
+  // [V8.1] Caso padrão: só inclui a etapa de revisão se sobrar tempo
+  // significativo (>= 60s) além do tempo padrão de 30 min.
+  const sobraRevisao = tempoTotal - TEMPO_PADRAO;
+  const etapas = [
+    { nivel: 'facil',   tempo: 8  * 60 },
+    { nivel: 'medio',   tempo: 10 * 60 },
+    { nivel: 'dificil', tempo: 12 * 60 }
+  ];
+  if (sobraRevisao >= 60) {
+    etapas.push({ nivel: 'revisao', tempo: sobraRevisao });
+  }
+
   return {
     ...infoBase,
     valido: true,
     modo: 'padrao',
-    etapas: [
-      { nivel: 'facil', tempo: 8 * 60 },
-      { nivel: 'medio', tempo: 10 * 60 },
-      { nivel: 'dificil', tempo: 12 * 60 },
-      { nivel: 'revisao', tempo: tempoTotal - TEMPO_PADRAO }
-    ],
+    etapas,
     mensagem: ''
   };
 }
@@ -1131,8 +1156,8 @@ function renderizarPainelCertificado() {
     const iconesGanhos = EMBLEMAS.filter(e => kitsConcluidos >= e.kitsNecessarios).map(e => `<span style="margin: 0 4px;">${e.icone}</span>`).join('');
     diplomaMedalhas.innerHTML = `<div style="font-size: 2.2rem; display: flex; justify-content: center; align-items: center; gap: 8px;">${iconesGanhos || '🌱'}</div>`;
   }
-  
-    // ===== MÉTRICAS VISUAIS =====
+
+  // ===== MÉTRICAS VISUAIS =====
   let tempoTotalGlobal = 0, somaF1 = 0, somaF2 = 0, somaF3 = 0;
   let contF1 = 0, contF2 = 0, contF3 = 0;
   Object.values(ESTADO.respostas || {}).forEach(r => {
@@ -1146,8 +1171,9 @@ function renderizarPainelCertificado() {
   const medF1 = contF1 > 0 ? Math.round(somaF1 / contF1) : 0;
   const medF2 = contF2 > 0 ? Math.round(somaF2 / contF2) : 0;
   const medF3 = contF3 > 0 ? Math.round(somaF3 / contF3) : 0;
+  const totalConcluidas = contarQuestoesConcluidas();
   if (diplomaResumo) {
-    diplomaResumo.innerHTML += `<div style="margin-top:6px;">Tempo Total Acumulado: <strong>${formatarSegundos(tempoTotalGlobal)}</strong> &bull; Média por Questão: <strong>${formatarSegundos(contF1 ? Math.round(tempoTotalGlobal / contarQuestoesConcluidas()) : 0)}</strong></div>`;
+    diplomaResumo.innerHTML += `<div style="margin-top:6px;">Tempo Total Acumulado: <strong>${formatarSegundos(tempoTotalGlobal)}</strong> &bull; Média por Questão: <strong>${formatarSegundos(totalConcluidas ? Math.round(tempoTotalGlobal / totalConcluidas) : 0)}</strong></div>`;
   }
   requestAnimationFrame(() => {
     desenharGraficoFases(medF1, medF2, medF3);
@@ -1271,10 +1297,42 @@ function executarSorteioAvaliacao() {
   }
 }
 
+// [V8.1] Painel de diretrizes ao professor no preview.
+function montarPainelInfoSala(container, resultadoSala) {
+  let painelInfo = document.getElementById('preview-info-sala');
+  if (!painelInfo) {
+    painelInfo = document.createElement('div');
+    painelInfo.id = 'preview-info-sala';
+    // Insere antes do container de botões, se existir; senão, no fim do modal
+    const modal = document.getElementById('modal-preview-sorteio');
+    if (modal) modal.appendChild(painelInfo);
+  }
+  if (!resultadoSala) {
+    painelInfo.classList.add('oculto');
+    painelInfo.innerHTML = '';
+    return;
+  }
+  painelInfo.classList.remove('oculto');
+  painelInfo.innerHTML = `
+    <div style="background:#f1f3f5; border-left:4px solid #173fa6; padding:12px 14px; border-radius:6px; font-size:0.95rem; margin:12px 0; text-align:left;">
+      <div><strong>📅 Aula:</strong> ${resultadoSala.aula.periodo} • ${resultadoSala.aula.inicio}–${resultadoSala.aula.fim}</div>
+      <div><strong>🔔 Sinal:</strong> ${resultadoSala.sinal} &nbsp;|&nbsp; <strong>🛑 Fechamento (−3 min):</strong> ${resultadoSala.fechamento}</div>
+      <div><strong>⏱️ Tempo real disponível:</strong> ${formatarSegundos(resultadoSala.tempoTotal)}</div>
+      <div><strong>🎯 Modo:</strong> ${String(resultadoSala.modo).replace(/_/g,' ')}</div>
+      ${resultadoSala.mensagem ? `<div style="color:#e8590c; margin-top:4px;">${resultadoSala.mensagem}</div>` : ''}
+      <div style="margin-top:8px; color:#495057; font-style:italic;">
+        💡 O tempo será revalidado ao confirmar. Se demorar, a prova é redistribuída automaticamente.
+      </div>
+    </div>`;
+}
+
 function abrirPreviewSorteio(modo, resultadoSala) {
   seedPreviewAtual = gerarSeedAleatorio();
   document.getElementById('preview-seed').textContent = String(seedPreviewAtual).padStart(3, '0');
   document.getElementById('modal-preview-sorteio').classList.remove('oculto');
+
+  // [V8.1] Painel de diretrizes ao professor
+  montarPainelInfoSala(null, resultadoSala);
 
   document.getElementById('btn-resortear').onclick = () => {
     seedPreviewAtual = gerarSeedAleatorio();
@@ -1294,12 +1352,43 @@ function abrirPreviewSorteio(modo, resultadoSala) {
     }
   };
 
+  // [V8.1] Confirmação com revalidação do tempo em modo sala.
   document.getElementById('btn-confirmar-inicio').onclick = () => {
-    document.getElementById('modal-preview-sorteio').classList.add('oculto');
-    iniciarProvaComSeed(seedPreviewAtual, modo, resultadoSala);
+    if (modo === 'sala') {
+      // Recalcula com o relógio atual — o preview pode estar defasado.
+      const reval = calcularProvaSala();
+      if (!reval.valido) {
+        alert(reval.mensagem);
+        return;
+      }
+      const tempoOriginal = resultadoSala ? resultadoSala.tempoTotal : 0;
+      const tempoAgora    = reval.tempoTotal;
+      const modoOriginal  = resultadoSala ? resultadoSala.modo : '';
+      const mudouModo     = resultadoSala && reval.modo !== modoOriginal;
+      const perdeuTempo   = resultadoSala && (tempoOriginal - tempoAgora) >= 120;
+
+      if (mudouModo || perdeuTempo) {
+        const msg = `⚠️ O tempo disponível mudou durante o preview.\n\n` +
+                    `Antes: ${formatarSegundos(tempoOriginal)} (${String(modoOriginal).replace(/_/g,' ')})\n` +
+                    `Agora: ${formatarSegundos(tempoAgora)} (${String(reval.modo).replace(/_/g,' ')})\n\n` +
+                    `Deseja prosseguir com o novo cálculo?`;
+        if (!confirm(msg)) return;
+      }
+      document.getElementById('modal-preview-sorteio').classList.add('oculto');
+      // Monta painel novamente no próximo preview
+      const pInfo = document.getElementById('preview-info-sala');
+      if (pInfo) { pInfo.classList.add('oculto'); pInfo.innerHTML = ''; }
+      iniciarProvaComSeed(seedPreviewAtual, modo, reval);
+    } else {
+      document.getElementById('modal-preview-sorteio').classList.add('oculto');
+      const pInfo = document.getElementById('preview-info-sala');
+      if (pInfo) { pInfo.classList.add('oculto'); pInfo.innerHTML = ''; }
+      iniciarProvaComSeed(seedPreviewAtual, modo, null);
+    }
   };
 }
 
+// [V8.1] Recalcula/revalida o tempo real e usa fechamentoMs absoluto.
 function iniciarProvaComSeed(seed, modo, resultadoSala) {
   const sorteio = sortearComSeed(seed);
   const av = ESTADO.avaliacao;
@@ -1308,17 +1397,47 @@ function iniciarProvaComSeed(seed, modo, resultadoSala) {
   av.modoProva = modo;
   av.tempoTotalGasto = 0;
 
-  if (modo === 'sala' && resultadoSala) {
-    etapasProvaAtual = resultadoSala.etapas;
-    fechamentoProvaTimestamp = agoraSincronizado().getTime() + resultadoSala.tempoTotal * 1000;
+  if (modo === 'sala') {
+    // Se o resultado do preview não veio, recalcula agora.
+    if (!resultadoSala || !resultadoSala.valido) {
+      const r = calcularProvaSala();
+      if (!r.valido) {
+        alert(r.mensagem);
+        return;
+      }
+      resultadoSala = r;
+    }
+    etapasProvaAtual = resultadoSala.etapas.map(e => ({ ...e }));
+    fechamentoProvaTimestamp = resultadoSala.fechamentoMs; // absoluto!
   } else {
     etapasProvaAtual = [
-      { nivel: 'facil', tempo: TEMPOS_AVALIACAO.facil },
-      { nivel: 'medio', tempo: TEMPOS_AVALIACAO.medio },
+      { nivel: 'facil',   tempo: TEMPOS_AVALIACAO.facil },
+      { nivel: 'medio',   tempo: TEMPOS_AVALIACAO.medio },
       { nivel: 'dificil', tempo: TEMPOS_AVALIACAO.dificil },
       { nivel: 'revisao', tempo: TEMPOS_AVALIACAO.revisao }
     ];
     fechamentoProvaTimestamp = null;
+  }
+
+  // [V8.1] Teste de sanidade: se a soma das etapas exceder o tempo real,
+  // redistribui proporcionalmente (cada etapa com piso de 30s).
+  if (fechamentoProvaTimestamp) {
+    const somaEtapas = etapasProvaAtual.reduce((acc, e) => acc + e.tempo, 0);
+    const restanteReal = Math.max(
+      0,
+      Math.floor((fechamentoProvaTimestamp - agoraSincronizado().getTime()) / 1000)
+    );
+    if (somaEtapas > restanteReal && etapasProvaAtual.length > 0) {
+      const n = etapasProvaAtual.length;
+      const base  = Math.floor(restanteReal / n);
+      const resto = restanteReal - base * n;
+      etapasProvaAtual = etapasProvaAtual.map((e, i) => ({
+        ...e,
+        tempo: Math.max(30, base + (i < resto ? 1 : 0))
+      }));
+      console.warn('⚠️ Etapas redistribuídas. Soma original:', somaEtapas,
+                   '| Tempo real:', restanteReal);
+    }
   }
 
   indiceEtapaAtual = 0;
@@ -1339,7 +1458,8 @@ function iniciarTemporizadorAvaliacao() {
   timerAvaliacao = setInterval(() => {
     const av = ESTADO.avaliacao;
 
-    if (fechamentoProvaTimestamp && Date.now() + OFFSET_NTP_MS >= fechamentoProvaTimestamp) {
+    // [V8.1] Compara com timestamp absoluto (evita aplicar OFFSET duas vezes)
+    if (fechamentoProvaTimestamp && agoraSincronizado().getTime() >= fechamentoProvaTimestamp) {
       finalizarProvaPorSinal();
       return;
     }
@@ -1456,7 +1576,8 @@ function atualizarInterfaceAvaliacao() {
     if (painelExtra) painelExtra.classList.add('oculto');
     const idxQuestao = nivelAtual === 'facil' ? 0 : (nivelAtual === 'medio' ? 1 : 2);
     const labels = { facil: 'Fácil', medio: 'Média', dificil: 'Difícil' };
-    renderizarQuestaoCardSimulado(questoes[idxQuestao], container, idxQuestao + 1, labels[nivelAtual]);
+    const qAtual = questoes[idxQuestao];
+    if (qAtual) renderizarQuestaoCardSimulado(qAtual, container, idxQuestao + 1, labels[nivelAtual]);
   }
 
   garantirRenderizacaoLatex(container);
@@ -1472,7 +1593,6 @@ function renderizarQuestaoCardSimulado(q, container, num, label) {
 }
 
 function atualizarVisorTempoAvaliacao() {
-  const av = ESTADO.avaliacao;
   const barra = document.getElementById('barra-tempo-preenchimento');
   if (barra && tempoMaximoEtapa > 0) {
     const pct = Math.max(0, (tempoRestanteEtapa / tempoMaximoEtapa) * 100);
@@ -1637,7 +1757,6 @@ function renderizarTabelaHistorico() {
   container.innerHTML = html;
 }
 
-// Recupera histórico de conclusões feitas antes deste patch
 function recomporHistoricoAusente() {
   if (!ESTADO.historico) ESTADO.historico = [];
   if (ESTADO.historico.length > 0) return;
@@ -1738,7 +1857,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Fechar modal de preview do sorteio (X ou clique no fundo escuro)
   const modalPreview = document.getElementById('modal-preview-sorteio');
   const btnFecharPreview = document.getElementById('btn-fechar-preview');
   if (btnFecharPreview && modalPreview) {
