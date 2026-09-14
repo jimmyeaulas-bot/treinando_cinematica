@@ -300,7 +300,7 @@ h1 {
   text-decoration: underline wavy var(--yel);
 }
 
-header.topo, main, footer {
+header.topo, nav[aria-label], main, footer {
   max-width: 1040px;
   margin: 0 auto;
   position: relative;
